@@ -1,0 +1,25 @@
+{
+  "manifest_version": 3,
+  "name": "Paris Ciné Aujourd'hui",
+  "version": "1.0.0",
+  "description": "Liste les films à l'affiche aujourd'hui dans les salles de Paris (données paris-cine.info).",
+  "icons": {
+    "16": "icon16.png",
+    "48": "icon48.png",
+    "128": "icon128.png"
+  },
+  "action": {
+    "default_popup": "popup.html",
+    "default_title": "Films à Paris aujourd'hui",
+    "default_icon": {
+      "16": "icon16.png",
+      "48": "icon48.png"
+    }
+  },
+  "permissions": ["storage"],
+  "host_permissions": [
+    "https://www.paris-cine.info/*",
+    "https://paris-cine.info/*",
+    "https://www.lavillette.com/*"
+  ]
+}
