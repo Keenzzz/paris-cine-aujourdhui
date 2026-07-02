@@ -1,4 +1,4 @@
-const API_BASE = "https://www.paris-cine.info";
+const API_BASE = "/proxy";
 const CACHE_KEY      = "pci_movies_cache";
 const WATCHLIST_KEY  = "pci_watchlist";
 const CULTES_CUTOFF = 2017;
