@@ -594,9 +594,16 @@ header {
   font-style: italic;
 }
 
+#movie-list,
 #villette-list,
 #watchlist-list {
   display: none;
+}
+
+#movie-list.tab-active,
+#villette-list.tab-active,
+#watchlist-list.tab-active {
+  display: block;
 }
 
 .watchlist-entry {
@@ -844,8 +851,8 @@ footer a {
 
 /* ── Vue grille ───────────────────────────────────────────────────────── */
 
-#movie-list.grid-view,
-#watchlist-list.grid-view {
+#movie-list.tab-active.grid-view,
+#watchlist-list.tab-active.grid-view {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(110px, 150px));
   justify-content: start;

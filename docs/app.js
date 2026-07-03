@@ -789,10 +789,14 @@ function updateBackToTopVisibility() {
 
 // ── Tab switching ─────────────────────────────────────────────────────────────
 
+function showOnlyList(activeEl) {
+  for (const el of [movieListEl, villetteListEl, watchlistEl]) {
+    el.classList.toggle("tab-active", el === activeEl);
+  }
+}
+
 function switchToMovieTab() {
-  movieListEl.style.display = "";
-  villetteListEl.style.display = "none";
-  watchlistEl.style.display = "none";
+  showOnlyList(movieListEl);
   showtimeFiltersEl.style.display = "";
   sortBarEl.style.display = "";
   footerSourceEl.innerHTML = 'données non officielles <a href="https://www.paris-cine.info" target="_blank" rel="noopener">paris-cine.info</a>';
@@ -800,9 +804,7 @@ function switchToMovieTab() {
 }
 
 function switchToVilletteTab() {
-  movieListEl.style.display = "none";
-  villetteListEl.style.display = "block";
-  watchlistEl.style.display = "none";
+  showOnlyList(villetteListEl);
   showtimeFiltersEl.style.display = "none";
   sortBarEl.style.display = "none";
   footerSourceEl.innerHTML = '<a href="https://www.lavillette.com/manifestations/cinema-en-plein-air-26/" target="_blank" rel="noopener">lavillette.com</a>';
@@ -810,9 +812,7 @@ function switchToVilletteTab() {
 }
 
 function switchToWatchlistTab() {
-  movieListEl.style.display = "none";
-  villetteListEl.style.display = "none";
-  watchlistEl.style.display = "block";
+  showOnlyList(watchlistEl);
   showtimeFiltersEl.style.display = "none";
   sortBarEl.style.display = "";
   footerSourceEl.innerHTML = 'données non officielles <a href="https://www.paris-cine.info" target="_blank" rel="noopener">paris-cine.info</a>';
@@ -917,6 +917,8 @@ async function init() {
   document.getElementById("rail-word").addEventListener("click", scrollToTop);
   backToTopBtn.addEventListener("click", scrollToTop);
   window.addEventListener("scroll", updateBackToTopVisibility);
+
+  showOnlyList(movieListEl);
 }
 
 init();
