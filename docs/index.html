@@ -8,48 +8,66 @@
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <header>
-    <div id="header-top">
-      <h1>Paris Ciné</h1>
-      <span id="imdb-legend">★ note IMDb</span>
-    </div>
-    <div id="date-label"></div>
-    <input id="search" type="search" placeholder="Film, réalisateur, ou cinéma…" autocomplete="off">
-    <div id="filters">
-      <div id="tabs">
-        <button class="tab active" data-tab="all">Tous les films</button>
-        <button class="tab" data-tab="cultes">Films cultes</button>
-        <button class="tab" data-tab="villette">Ciné plein air</button>
-        <button class="tab" data-tab="watchlist">Ma liste</button>
+  <div id="layout">
+    <aside id="rail">
+      <p id="rail-word">Paris Ciné</p>
+      <div id="rail-stat">
+        <span class="num" id="stat-count">–</span>
+        <span class="lbl">Films aujourd'hui</span>
       </div>
-      <div id="showtime-filters">
-        <select id="time-filter">
-          <option value="all">Tous créneaux</option>
-          <option value="morning">Matin (avant 12h)</option>
-          <option value="afternoon">Après-midi (12h–18h)</option>
-          <option value="evening">Soir (après 18h)</option>
-        </select>
-        <select id="version-filter">
-          <option value="all">VF / VO</option>
-          <option value="vo">VO</option>
-          <option value="vf">VF</option>
-        </select>
+      <div id="rail-feature-block">
+        <div class="rail-feat-top">Coup de cœur</div>
+        <div class="rail-feat" id="rail-feature"></div>
       </div>
+      <div id="rail-villette-block">
+        <div class="rail-block-h">Ciné plein air</div>
+        <div id="rail-villette"></div>
+      </div>
+    </aside>
+    <div id="main">
+      <header>
+        <div id="header-top">
+          <span id="imdb-legend">★ note IMDb</span>
+        </div>
+        <div id="date-label"></div>
+        <input id="search" type="search" placeholder="Film, réalisateur, ou cinéma…" autocomplete="off">
+        <div id="filters">
+          <div id="tabs">
+            <button class="tab active" data-tab="all">Tous les films</button>
+            <button class="tab" data-tab="cultes">Films cultes</button>
+            <button class="tab" data-tab="villette">Ciné plein air</button>
+            <button class="tab" data-tab="watchlist">Ma liste</button>
+          </div>
+          <div id="showtime-filters">
+            <select id="time-filter">
+              <option value="all">Tous créneaux</option>
+              <option value="morning">Matin (avant 12h)</option>
+              <option value="afternoon">Après-midi (12h–18h)</option>
+              <option value="evening">Soir (après 18h)</option>
+            </select>
+            <select id="version-filter">
+              <option value="all">VF / VO</option>
+              <option value="vo">VO</option>
+              <option value="vf">VF</option>
+            </select>
+          </div>
+        </div>
+      </header>
+      <div id="status"></div>
+      <div id="sort-bar">
+        <button class="sort-btn active" data-sort="alpha">A → Z</button>
+        <button class="sort-btn" data-sort="year">Année ↓</button>
+        <button class="sort-btn" data-sort="imdb">IMDb ↓</button>
+      </div>
+      <ul id="movie-list"></ul>
+      <div id="villette-list"></div>
+      <div id="watchlist-list"></div>
+      <footer>
+        <span id="count-label"></span>
+        · <span id="footer-source">données non officielles <a href="https://www.paris-cine.info" target="_blank" rel="noopener">paris-cine.info</a></span>
+      </footer>
     </div>
-  </header>
-  <div id="status"></div>
-  <div id="sort-bar">
-    <button class="sort-btn active" data-sort="alpha">A → Z</button>
-    <button class="sort-btn" data-sort="year">Année ↓</button>
-    <button class="sort-btn" data-sort="imdb">IMDb ↓</button>
   </div>
-  <ul id="movie-list"></ul>
-  <div id="villette-list"></div>
-  <div id="watchlist-list"></div>
-  <footer>
-    <span id="count-label"></span>
-    · <span id="footer-source">données non officielles <a href="https://www.paris-cine.info" target="_blank" rel="noopener">paris-cine.info</a></span>
-  </footer>
   <script src="app.js"></script>
 </body>
 </html>

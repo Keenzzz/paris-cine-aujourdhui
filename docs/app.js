@@ -626,6 +626,62 @@ function renderVilletteList() {
   countLabelEl.textContent = `${entries.length} séance${entries.length !== 1 ? "s" : ""} · Prairie du triangle · Gratuit`;
 }
 
+// ── Rail (colonne latérale) ─────────────────────────────────────────────────
+
+function renderRailFeature(movies) {
+  const block = document.getElementById("rail-feature-block");
+  const el = document.getElementById("rail-feature");
+  const rated = movies.filter((m) => m.im_r);
+  if (rated.length === 0) {
+    block.style.display = "none";
+    return;
+  }
+  const top = rated.reduce((best, m) => (parseFloat(m.im_r) > parseFloat(best.im_r) ? m : best));
+  el.innerHTML = "";
+  const img = document.createElement("img");
+  img.className = "poster";
+  img.loading = "lazy";
+  img.src = `${API_BASE}/get_poster.php?id=${top.id}`;
+  img.alt = "";
+  el.appendChild(img);
+  const body = document.createElement("div");
+  body.className = "rail-feat-body";
+  const title = document.createElement("div");
+  title.className = "rail-feat-title";
+  title.textContent = top.ti;
+  body.appendChild(title);
+  const meta = document.createElement("div");
+  meta.className = "rail-feat-meta";
+  meta.textContent = [top.di, `★ ${top.im_r}`, top.du].filter(Boolean).join(" · ");
+  body.appendChild(meta);
+  el.appendChild(body);
+}
+
+function renderRailVillette() {
+  const block = document.getElementById("rail-villette-block");
+  const el = document.getElementById("rail-villette");
+  const upcoming = VILLETTE_PROGRAM.filter((f) => f.date >= currentDate).slice(0, 2);
+  if (upcoming.length === 0) {
+    block.style.display = "none";
+    return;
+  }
+  el.innerHTML = "";
+  for (const f of upcoming) {
+    const div = document.createElement("div");
+    div.className = "rail-villette-item";
+    const d = new Date(f.date + "T12:00:00");
+    const dateStr = d.toLocaleDateString("fr-FR", { day: "numeric", month: "short" });
+    const title = document.createElement("div");
+    title.textContent = f.title;
+    const meta = document.createElement("span");
+    meta.className = "d";
+    meta.textContent = `La Villette · ${dateStr} · ${f.jeune ? "18h00" : "21h00"}`;
+    div.appendChild(title);
+    div.appendChild(meta);
+    el.appendChild(div);
+  }
+}
+
 // ── Tab switching ─────────────────────────────────────────────────────────────
 
 function switchToMovieTab() {
@@ -694,6 +750,11 @@ async function init() {
   }
   statusEl.textContent = "";
   countLabelEl.textContent = `${movies.length} film${movies.length !== 1 ? "s" : ""} aujourd'hui`;
+
+  const statCountEl = document.getElementById("stat-count");
+  if (statCountEl) statCountEl.textContent = String(movies.length);
+  renderRailFeature(movies);
+  renderRailVillette();
 
   const fragment = document.createDocumentFragment();
   for (const movie of movies) fragment.appendChild(buildMovieRow(movie));
