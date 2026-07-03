@@ -93,6 +93,7 @@ const SORT_LABELS = {
 };
 const SORT_DEFAULT_DIR = { alpha: "asc", year: "desc", imdb: "desc" };
 let watchlist     = [];
+let moviesToday   = [];
 let _searchToken  = 0;
 
 let movieListEl, villetteListEl, watchlistEl, countLabelEl, searchEl;
@@ -273,12 +274,28 @@ function showtimeMatchesFilters(s) {
   return matchesTime && matchesVersion;
 }
 
+function countVisibleCinemas() {
+  const cinemas = new Set();
+  for (const li of movieListEl.children) {
+    if (li.classList.contains("hidden") || li.classList.contains("time-hidden")) continue;
+    if (!li._showtimes) continue;
+    for (const s of li._showtimes) {
+      if (!s.start.startsWith(currentDate)) continue;
+      if ((activeWindow !== "all" || activeVersion !== "all") && !showtimeMatchesFilters(s)) continue;
+      if (s.title) cinemas.add(s.title);
+    }
+  }
+  return cinemas.size;
+}
+
 function updateCount() {
   let visible = 0;
   for (const li of movieListEl.children) {
     if (!li.classList.contains("hidden") && !li.classList.contains("time-hidden")) visible++;
   }
-  countLabelEl.textContent = `${visible} film${visible !== 1 ? "s" : ""} aujourd'hui`;
+  const cinemaCount = countVisibleCinemas();
+  const cinemaPart = cinemaCount > 0 ? ` · dans ${cinemaCount} cinéma${cinemaCount !== 1 ? "s" : ""}` : "";
+  countLabelEl.textContent = `${visible} film${visible !== 1 ? "s" : ""} aujourd'hui${cinemaPart}`;
 }
 
 function renderShowtimesList(showtimesEl, showtimes) {
@@ -346,6 +363,7 @@ async function toggleBookmark(movie, btn) {
   }
   await storage.set({ [WATCHLIST_KEY]: watchlist });
   updateWatchlistTab();
+  renderRailWatchlistToday(moviesToday);
 }
 
 function updateWatchlistTab() {
@@ -404,6 +422,7 @@ function renderWatchlist() {
       const bookmarkBtn = movieListEl.querySelector(`[data-bookmark-id="${m.id}"]`);
       if (bookmarkBtn) { bookmarkBtn.textContent = "♡"; bookmarkBtn.classList.remove("bookmarked"); }
       updateWatchlistTab();
+      renderRailWatchlistToday(moviesToday);
       renderWatchlist();
     });
     titleLine.appendChild(removeBtn);
@@ -711,33 +730,70 @@ function renderRailFeature(movies) {
     block.style.display = "none";
     return;
   }
-  const top = rated.reduce((best, m) => (parseFloat(m.im_r) > parseFloat(best.im_r) ? m : best));
+  const top3 = rated
+    .slice()
+    .sort((a, b) => parseFloat(b.im_r) - parseFloat(a.im_r))
+    .slice(0, 3);
   el.innerHTML = "";
-  el.setAttribute("role", "button");
-  el.setAttribute("tabindex", "0");
-  const img = createPosterImg(`${API_BASE}/get_poster.php?id=${top.id}`, "poster");
-  el.appendChild(img);
-  const body = document.createElement("div");
-  body.className = "rail-feat-body";
-  const title = document.createElement("div");
-  title.className = "rail-feat-title";
-  title.textContent = top.ti;
-  body.appendChild(title);
-  const meta = document.createElement("div");
-  meta.className = "rail-feat-meta";
-  meta.textContent = [top.di, `★ ${top.im_r}`, top.du].filter(Boolean).join(" · ");
-  body.appendChild(meta);
-  el.appendChild(body);
-  el.onclick = () => openMovieFromRail(top.id);
-  el.onkeydown = (e) => {
-    if (e.key === "Enter" || e.key === " ") { e.preventDefault(); openMovieFromRail(top.id); }
-  };
+  for (const m of top3) {
+    const item = document.createElement("div");
+    item.className = "rail-feat-item";
+    item.setAttribute("role", "button");
+    item.setAttribute("tabindex", "0");
+    const img = createPosterImg(`${API_BASE}/get_poster.php?id=${m.id}`, "rail-feat-poster");
+    item.appendChild(img);
+    const body = document.createElement("div");
+    body.className = "rail-feat-body";
+    const title = document.createElement("div");
+    title.className = "rail-feat-title";
+    title.textContent = m.ti;
+    body.appendChild(title);
+    const meta = document.createElement("div");
+    meta.className = "rail-feat-meta";
+    meta.textContent = [`★ ${m.im_r}`, m.di].filter(Boolean).join(" · ");
+    body.appendChild(meta);
+    item.appendChild(body);
+    item.onclick = () => openMovieFromRail(m.id);
+    item.onkeydown = (e) => {
+      if (e.key === "Enter" || e.key === " ") { e.preventDefault(); openMovieFromRail(m.id); }
+    };
+    el.appendChild(item);
+  }
+}
+
+function renderRailWatchlistToday(movies) {
+  const block = document.getElementById("rail-watchlist-block");
+  const countEl = document.getElementById("rail-watchlist-count");
+  const el = document.getElementById("rail-watchlist-today");
+  const todayIds = new Set(movies.map((m) => String(m.id)));
+  const matches = watchlist.filter((w) => todayIds.has(String(w.id)));
+  if (matches.length === 0) {
+    block.style.display = "none";
+    return;
+  }
+  block.style.display = "";
+  countEl.textContent = matches.length === 1
+    ? "1 film de votre liste passe aujourd'hui"
+    : `${matches.length} films de votre liste passent aujourd'hui`;
+  el.innerHTML = "";
+  for (const m of matches) {
+    const item = document.createElement("div");
+    item.className = "rail-watchlist-item";
+    item.setAttribute("role", "button");
+    item.setAttribute("tabindex", "0");
+    item.textContent = m.ti;
+    item.onclick = () => openMovieFromRail(m.id);
+    item.onkeydown = (e) => {
+      if (e.key === "Enter" || e.key === " ") { e.preventDefault(); openMovieFromRail(m.id); }
+    };
+    el.appendChild(item);
+  }
 }
 
 function renderRailVillette() {
   const block = document.getElementById("rail-villette-block");
   const el = document.getElementById("rail-villette");
-  const upcoming = VILLETTE_PROGRAM.filter((f) => f.date >= currentDate).slice(0, 2);
+  const upcoming = VILLETTE_PROGRAM.filter((f) => f.date >= currentDate).slice(0, 5);
   if (upcoming.length === 0) {
     block.style.display = "none";
     return;
@@ -853,18 +909,22 @@ async function init() {
     return;
   }
   statusEl.textContent = "";
+  moviesToday = movies;
   countLabelEl.textContent = `${movies.length} film${movies.length !== 1 ? "s" : ""} aujourd'hui`;
 
   const statCountEl = document.getElementById("stat-count");
   if (statCountEl) statCountEl.textContent = String(movies.length);
   renderRailFeature(movies);
+  renderRailWatchlistToday(movies);
   renderRailVillette();
 
   const fragment = document.createDocumentFragment();
   const rows = movies.map(buildMovieRow);
   for (const row of rows) fragment.appendChild(row);
   movieListEl.appendChild(fragment);
-  mapWithConcurrency(rows, 6, (li) => li._loadShowtimes());
+  mapWithConcurrency(rows, 6, (li) => li._loadShowtimes().then(() => {
+    if (activeTab !== "villette" && activeTab !== "watchlist") updateCount();
+  }));
 
   searchEl.addEventListener("input", () => {
     if (activeTab === "villette") renderVilletteList();

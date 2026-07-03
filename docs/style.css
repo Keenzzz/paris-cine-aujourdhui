@@ -81,40 +81,52 @@ a { color: inherit; }
 
 .rail-block-h { color: #7f7663; }
 
-.rail-feat {
+.rail-feat-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.rail-feat-item {
+  display: flex;
+  gap: 10px;
+  padding: 6px;
   border: 1px solid #2c2619;
   border-radius: 4px;
-  overflow: hidden;
   cursor: pointer;
   transition: border-color 0.15s, box-shadow 0.2s;
 }
 
-.rail-feat:hover {
+.rail-feat-item:hover {
   border-color: #4f8f80;
   box-shadow: 0 0 14px rgba(79, 143, 128, 0.25);
 }
 
-.rail-feat:focus-visible {
+.rail-feat-item:focus-visible {
   outline: 2px solid #4f8f80;
   outline-offset: 2px;
 }
 
-.rail-feat img.poster {
-  width: 100%;
-  height: 175px;
+.rail-feat-item img.rail-feat-poster {
+  width: 46px;
+  height: 66px;
   object-fit: cover;
+  border-radius: 3px;
   display: block;
   background: #1c1811;
+  flex-shrink: 0;
 }
 
 .rail-feat-body {
-  padding: 8px 10px 12px;
+  min-width: 0;
+  padding: 2px 0;
 }
 
 .rail-feat-title {
   font-family: Georgia, "Iowan Old Style", serif;
   font-weight: 700;
-  font-size: 13.5px;
+  font-size: 12.5px;
+  line-height: 1.3;
   color: #f6efe1;
 }
 
@@ -122,6 +134,38 @@ a { color: inherit; }
   font-size: 10.5px;
   color: #9a917c;
   margin-top: 3px;
+}
+
+/* ── Rail : dans votre liste aujourd'hui ─────────────────────────────── */
+
+.rail-watchlist-count {
+  font-size: 11px;
+  color: #9a917c;
+  margin-bottom: 8px;
+  line-height: 1.4;
+}
+
+.rail-watchlist-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.rail-watchlist-item {
+  font-size: 11.5px;
+  color: #d8cfba;
+  cursor: pointer;
+  transition: color 0.15s;
+}
+
+.rail-watchlist-item:hover {
+  color: #7bcabb;
+  text-decoration: underline;
+}
+
+.rail-watchlist-item:focus-visible {
+  outline: 2px solid #4f8f80;
+  outline-offset: 2px;
 }
 
 #rail-villette {
@@ -959,7 +1003,8 @@ footer a {
 
   #rail-word { flex: 1 0 100%; }
   #rail-stat { flex: 0 0 auto; }
-  .rail-feat { flex: 1 1 180px; max-width: 220px; }
+  #rail-watchlist-block { flex: 1 1 180px; }
+  #rail-feature-block { flex: 1 1 180px; max-width: 260px; }
   #rail-villette { flex: 1 1 180px; }
 
   header, #status, #sort-bar, .movie, .watchlist-entry, .villette-entry, .villette-date, footer {
