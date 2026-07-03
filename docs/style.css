@@ -155,6 +155,13 @@ a { color: inherit; }
   border-left: none;
 }
 
+#sticky-top {
+  position: sticky;
+  top: 0;
+  z-index: 3;
+  background: #15130f;
+}
+
 header {
   padding: 30px 28px 20px;
 }
@@ -377,7 +384,6 @@ header {
   gap: 16px;
   padding: 18px 28px;
   border-bottom: 1px solid #211c15;
-  cursor: pointer;
 }
 
 .movie:hover {
@@ -396,6 +402,17 @@ header {
   border-radius: 2px;
   background: #1c1811;
   flex-shrink: 0;
+}
+
+.poster-loading {
+  background: linear-gradient(90deg, #1c1811 25%, #2a2419 37%, #1c1811 63%);
+  background-size: 400% 100%;
+  animation: poster-shimmer 1.4s ease infinite;
+}
+
+@keyframes poster-shimmer {
+  0%   { background-position: 100% 50%; }
+  100% { background-position: 0 50%; }
 }
 
 .movie-main {
@@ -567,8 +584,24 @@ header {
 }
 
 .watchlist-entry {
+  display: flex;
+  gap: 16px;
   padding: 14px 28px;
   border-bottom: 1px solid #211c15;
+}
+
+.watchlist-entry img.poster {
+  width: 56px;
+  height: 82px;
+  object-fit: cover;
+  border-radius: 2px;
+  background: #1c1811;
+  flex-shrink: 0;
+}
+
+.watchlist-main {
+  flex: 1;
+  min-width: 0;
 }
 
 .watchlist-title {
@@ -720,6 +753,144 @@ footer {
 
 footer a {
   color: #9a917c;
+}
+
+#back-to-top {
+  position: fixed;
+  right: 24px;
+  bottom: 24px;
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  border: 1px solid #3a3223;
+  background: #1c1811;
+  color: #e0a944;
+  font-size: 18px;
+  font-weight: 700;
+  line-height: 1;
+  cursor: pointer;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.45);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 5;
+  transition: border-color 0.15s, box-shadow 0.2s, transform 0.15s;
+}
+
+#back-to-top:hover {
+  border-color: #e0a944;
+  box-shadow: 0 0 16px rgba(224, 169, 68, 0.4);
+  transform: translateY(-2px);
+}
+
+#back-to-top.visible {
+  display: flex;
+}
+
+#rail-word {
+  cursor: pointer;
+}
+
+#view-toggle {
+  display: flex;
+  gap: 6px;
+  margin-left: auto;
+}
+
+.view-btn {
+  background: none;
+  border: 1px solid #3a3223;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 11px;
+  color: #8f8570;
+  padding: 2px 8px;
+  transition: color 0.15s, border-color 0.15s;
+}
+
+.view-btn:hover {
+  color: #d8cfba;
+  border-color: #4f8f80;
+}
+
+.view-btn.active {
+  color: #e0a944;
+  border-color: #e0a944;
+}
+
+/* ── Vue grille ───────────────────────────────────────────────────────── */
+
+#movie-list.grid-view,
+#watchlist-list.grid-view {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  gap: 16px;
+  padding: 20px 28px;
+}
+
+#movie-list.grid-view .movie,
+#watchlist-list.grid-view .watchlist-entry {
+  position: relative;
+  display: block;
+  padding: 0;
+  border-bottom: none;
+  aspect-ratio: 2 / 3;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+#movie-list.grid-view .movie:hover,
+#watchlist-list.grid-view .watchlist-entry:hover {
+  background: none;
+}
+
+#movie-list.grid-view .movie.hidden,
+#movie-list.grid-view .movie.time-hidden {
+  display: none;
+}
+
+#movie-list.grid-view .movie img.poster,
+#watchlist-list.grid-view .watchlist-entry img.poster {
+  width: 100%;
+  height: 100%;
+  border-radius: 4px;
+}
+
+#movie-list.grid-view .movie-main,
+#watchlist-list.grid-view .watchlist-main {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  padding: 10px;
+  background: linear-gradient(to top, rgba(10, 8, 5, 0.95) 0%, rgba(10, 8, 5, 0.6) 55%, transparent 100%);
+  opacity: 0;
+  overflow-y: auto;
+  transition: opacity 0.15s;
+}
+
+#movie-list.grid-view .movie:hover .movie-main,
+#watchlist-list.grid-view .watchlist-entry:hover .watchlist-main {
+  opacity: 1;
+}
+
+#movie-list.grid-view .movie-title,
+#watchlist-list.grid-view .watchlist-title {
+  font-size: 13px;
+}
+
+#movie-list.grid-view .movie-original-title,
+#movie-list.grid-view .movie-meta,
+#watchlist-list.grid-view .watchlist-original,
+#watchlist-list.grid-view .watchlist-meta,
+#watchlist-list.grid-view .watchlist-saved {
+  font-size: 10.5px;
+}
+
+#movie-list.grid-view .showtimes,
+#watchlist-list.grid-view .showtimes {
+  max-width: none;
 }
 
 /* ── Responsive : le rail passe au-dessus du contenu ─────────────────── */

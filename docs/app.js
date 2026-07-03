@@ -83,6 +83,7 @@ let activeWindow  = "all";
 let activeVersion = "all";
 let activeSort    = "alpha";
 let activeSortDir = "asc";
+let activeView    = "list";
 let currentDate   = "";
 
 const SORT_LABELS = {
@@ -169,6 +170,46 @@ async function getShowtimes(movieId) {
   return (json.showtimes || [])
     .filter((s) => s.start)
     .sort((a, b) => a.start.localeCompare(b.start));
+}
+
+function ensureShowtimes(el, movieId) {
+  if (!el._showtimesPromise) {
+    el._showtimesPromise = getShowtimes(movieId)
+      .then((showtimes) => { el._showtimes = showtimes; return showtimes; })
+      .catch((err) => { el._showtimesPromise = null; throw err; });
+  }
+  return el._showtimesPromise;
+}
+
+async function mapWithConcurrency(items, limit, fn) {
+  let i = 0;
+  const workers = new Array(Math.min(limit, items.length)).fill(0).map(async () => {
+    while (i < items.length) {
+      const item = items[i++];
+      await fn(item);
+    }
+  });
+  await Promise.all(workers);
+}
+
+function createPosterImg(src, className) {
+  const img = document.createElement("img");
+  img.className = `${className} poster-loading`;
+  img.loading = "lazy";
+  img.alt = "";
+  const clearLoading = () => img.classList.remove("poster-loading");
+  img.addEventListener("load", clearLoading, { once: true });
+  img.addEventListener("error", clearLoading, { once: true });
+  img.src = src;
+  return img;
+}
+
+function loadRowShowtimes(el, movieId, panel) {
+  return ensureShowtimes(el, movieId)
+    .then((showtimes) => renderDayTabs(panel, showtimes))
+    .catch(() => {
+      panel.innerHTML = '<ul class="showtimes"><li class="empty">Impossible de charger les séances.</li></ul>';
+    });
 }
 
 function groupByDate(showtimes) {
@@ -324,15 +365,20 @@ function renderWatchlist() {
     countLabelEl.textContent = "0 film épinglé";
     return;
   }
+  const toLoad = [];
   for (const m of [...watchlist].reverse()) {
     const div = document.createElement("div");
     div.className = "watchlist-entry";
-    div.style.cursor = "pointer";
     div.dataset.title = m.ti || "";
     div.dataset.year  = m.ye ? String(m.ye) : "0";
     div.dataset.imdb  = m.im_r ? String(m.im_r) : "0";
     div._showtimes = null;
-    div._loaded = false;
+
+    const poster = createPosterImg(`${API_BASE}/get_poster.php?id=${m.id}`, "poster");
+    div.appendChild(poster);
+
+    const main = document.createElement("div");
+    main.className = "watchlist-main";
 
     const titleLine = document.createElement("div");
     titleLine.className = "watchlist-title";
@@ -358,47 +404,36 @@ function renderWatchlist() {
       renderWatchlist();
     });
     titleLine.appendChild(removeBtn);
-    div.appendChild(titleLine);
+    main.appendChild(titleLine);
 
     if (m.o_ti && m.o_ti !== m.ti) {
       const original = document.createElement("div");
       original.className = "watchlist-original";
       original.textContent = m.o_ti;
-      div.appendChild(original);
+      main.appendChild(original);
     }
     const meta = document.createElement("div");
     meta.className = "watchlist-meta";
     meta.textContent = [m.di, m.ye].filter(Boolean).join(" · ");
-    div.appendChild(meta);
+    main.appendChild(meta);
 
     const savedDate = document.createElement("div");
     savedDate.className = "watchlist-saved";
     savedDate.textContent = `Épinglé le ${new Date(m.savedAt + "T12:00:00").toLocaleDateString("fr-FR", { day: "numeric", month: "long" })}`;
-    div.appendChild(savedDate);
+    main.appendChild(savedDate);
 
     const panel = document.createElement("div");
-    panel.className = "showtime-panel";
-    div.appendChild(panel);
+    panel.className = "showtime-panel open";
+    panel.innerHTML = '<ul class="showtimes"><li class="loading">Chargement des séances…</li></ul>';
+    main.appendChild(panel);
+    div.appendChild(main);
 
-    div.addEventListener("click", async () => {
-      const open = panel.classList.toggle("open");
-      if (!open) return;
-      if (!div._loaded) {
-        div._loaded = true;
-        panel.innerHTML = '<ul class="showtimes"><li class="loading">Chargement des séances…</li></ul>';
-        try {
-          div._showtimes = await getShowtimes(m.id);
-          renderDayTabs(panel, div._showtimes);
-        } catch {
-          panel.innerHTML = '<ul class="showtimes"><li class="empty">Impossible de charger les séances.</li></ul>';
-        }
-      }
-    });
-
+    toLoad.push(() => loadRowShowtimes(div, m.id, panel));
     watchlistEl.appendChild(div);
   }
   countLabelEl.textContent = `${watchlist.length} film${watchlist.length !== 1 ? "s" : ""} épinglé${watchlist.length !== 1 ? "s" : ""}`;
   sortWatchlistEntries();
+  mapWithConcurrency(toLoad, 6, (load) => load());
 }
 
 // ── Movie rows ────────────────────────────────────────────────────────────────
@@ -412,11 +447,7 @@ function buildMovieRow(movie) {
   li.dataset.imdb = movie.im_r ? String(movie.im_r) : "0";
   li._showtimes = null;
 
-  const img = document.createElement("img");
-  img.className = "poster";
-  img.loading = "lazy";
-  img.src = `${API_BASE}/get_poster.php?id=${movie.id}`;
-  img.alt = "";
+  const img = createPosterImg(`${API_BASE}/get_poster.php?id=${movie.id}`, "poster");
   li.appendChild(img);
 
   const main = document.createElement("div");
@@ -459,25 +490,11 @@ function buildMovieRow(movie) {
   main.appendChild(meta);
 
   const panel = document.createElement("div");
-  panel.className = "showtime-panel";
+  panel.className = "showtime-panel open";
+  panel.innerHTML = '<ul class="showtimes"><li class="loading">Chargement des séances…</li></ul>';
   main.appendChild(panel);
   li.appendChild(main);
-
-  let loaded = false;
-  li.addEventListener("click", async () => {
-    const open = panel.classList.toggle("open");
-    if (!open) return;
-    if (!loaded) {
-      loaded = true;
-      panel.innerHTML = '<ul class="showtimes"><li class="loading">Chargement des séances…</li></ul>';
-      try {
-        li._showtimes = await getShowtimes(movie.id);
-        renderDayTabs(panel, li._showtimes);
-      } catch {
-        panel.innerHTML = '<ul class="showtimes"><li class="empty">Impossible de charger les séances.</li></ul>';
-      }
-    }
-  });
+  li._loadShowtimes = () => loadRowShowtimes(li, movie.id, panel);
 
   return li;
 }
@@ -554,9 +571,9 @@ async function applyFilters() {
   if (toCheckCinema.length > 0) {
     await Promise.all(toCheckCinema.map(async (li) => {
       try {
-        if (!li._showtimes) li._showtimes = await getShowtimes(li.dataset.movieId);
+        const showtimes = li._showtimes || await ensureShowtimes(li, li.dataset.movieId);
         if (token !== _searchToken) return;
-        if (li._showtimes.some((s) => s.title?.toLowerCase().includes(q))) {
+        if (showtimes.some((s) => s.title?.toLowerCase().includes(q))) {
           li.classList.remove("hidden");
           updateCount();
         }
@@ -589,9 +606,8 @@ async function applyShowtimeFilters() {
   updateCount();
   if (toFetch.length > 0) {
     await Promise.all(toFetch.map((li) =>
-      getShowtimes(li.dataset.movieId)
+      ensureShowtimes(li, li.dataset.movieId)
         .then((showtimes) => {
-          li._showtimes = showtimes;
           const today = showtimes.filter(s => s.start.startsWith(currentDate));
           li.classList.toggle("time-hidden", !today.some(showtimeMatchesFilters));
           updateCount();
@@ -630,11 +646,7 @@ function renderVilletteList() {
     }
     const div = document.createElement("div");
     div.className = "villette-entry" + (f.date < currentDate ? " past" : "");
-    const poster = document.createElement("img");
-    poster.className = "villette-poster";
-    poster.loading = "lazy";
-    poster.src = f.img;
-    poster.alt = "";
+    const poster = createPosterImg(f.img, "villette-poster");
     div.appendChild(poster);
     const info = document.createElement("div");
     info.className = "villette-info";
@@ -681,10 +693,6 @@ function openMovieFromRail(movieId) {
   const target = movieListEl.querySelector(`[data-movie-id="${movieId}"]`);
   if (!target) return;
   target.scrollIntoView({ behavior: "smooth", block: "center" });
-  const panel = target.querySelector(".showtime-panel");
-  if (panel && !panel.classList.contains("open")) {
-    target.click();
-  }
 }
 
 function renderRailFeature(movies) {
@@ -699,11 +707,7 @@ function renderRailFeature(movies) {
   el.innerHTML = "";
   el.setAttribute("role", "button");
   el.setAttribute("tabindex", "0");
-  const img = document.createElement("img");
-  img.className = "poster";
-  img.loading = "lazy";
-  img.src = `${API_BASE}/get_poster.php?id=${top.id}`;
-  img.alt = "";
+  const img = createPosterImg(`${API_BASE}/get_poster.php?id=${top.id}`, "poster");
   el.appendChild(img);
   const body = document.createElement("div");
   body.className = "rail-feat-body";
@@ -751,6 +755,29 @@ function renderRailVillette() {
   }
 }
 
+// ── View toggle (list / grid) ────────────────────────────────────────────────
+
+function setView(view) {
+  activeView = view;
+  for (const btn of document.querySelectorAll(".view-btn")) {
+    btn.classList.toggle("active", btn.dataset.view === view);
+  }
+  movieListEl.classList.toggle("grid-view", view === "grid");
+  watchlistEl.classList.toggle("grid-view", view === "grid");
+}
+
+// ── Scroll to top ─────────────────────────────────────────────────────────────
+
+let backToTopBtn;
+
+function scrollToTop() {
+  window.scrollTo({ top: 0, behavior: "smooth" });
+}
+
+function updateBackToTopVisibility() {
+  backToTopBtn.classList.toggle("visible", window.scrollY > 200);
+}
+
 // ── Tab switching ─────────────────────────────────────────────────────────────
 
 function switchToMovieTab() {
@@ -796,6 +823,7 @@ async function init() {
   showtimeFiltersEl = document.getElementById("showtime-filters");
   sortBarEl         = document.getElementById("sort-bar");
   footerSourceEl    = document.getElementById("footer-source");
+  backToTopBtn      = document.getElementById("back-to-top");
 
   currentDate = todayISO();
   dateLabelEl.textContent = new Date().toLocaleDateString("fr-FR", {
@@ -824,8 +852,10 @@ async function init() {
   renderRailVillette();
 
   const fragment = document.createDocumentFragment();
-  for (const movie of movies) fragment.appendChild(buildMovieRow(movie));
+  const rows = movies.map(buildMovieRow);
+  for (const row of rows) fragment.appendChild(row);
   movieListEl.appendChild(fragment);
+  mapWithConcurrency(rows, 6, (li) => li._loadShowtimes());
 
   searchEl.addEventListener("input", () => {
     if (activeTab === "villette") renderVilletteList();
@@ -870,6 +900,14 @@ async function init() {
     });
   }
   updateSortBtns();
+
+  for (const btn of document.querySelectorAll(".view-btn")) {
+    btn.addEventListener("click", () => setView(btn.dataset.view));
+  }
+
+  document.getElementById("rail-word").addEventListener("click", scrollToTop);
+  backToTopBtn.addEventListener("click", scrollToTop);
+  window.addEventListener("scroll", updateBackToTopVisibility);
 }
 
 init();

@@ -10,7 +10,7 @@
 <body>
   <div id="layout">
     <aside id="rail">
-      <p id="rail-word">Paris Ciné</p>
+      <p id="rail-word" title="Retour en haut">Paris Ciné</p>
       <div id="rail-stat">
         <span class="num" id="stat-count">–</span>
         <span class="lbl">Films aujourd'hui</span>
@@ -25,51 +25,57 @@
       </div>
     </aside>
     <div id="main">
-      <header>
-        <div id="header-top">
-          <span id="imdb-legend">★ note IMDb (si disponible)</span>
-        </div>
-        <div id="date-label"></div>
-        <input id="search" type="search" placeholder="Film, réalisateur, ou cinéma…" autocomplete="off">
-        <div id="filters">
-          <div id="tabs">
-            <button class="tab active" data-tab="all">Tous les films</button>
-            <button class="tab" data-tab="cultes">Films cultes</button>
-            <button class="tab" data-tab="villette">Ciné plein air</button>
-            <button class="tab" data-tab="watchlist">Ma liste</button>
+      <div id="sticky-top">
+        <header>
+          <div id="header-top">
+            <span id="imdb-legend">★ note IMDb (si disponible)</span>
           </div>
-          <div id="showtime-filters">
-            <div class="dd" id="time-filter-dd" data-value="all">
-              <button type="button" class="dd-trigger" aria-haspopup="listbox" aria-expanded="false">
-                <span class="dd-label">Tous créneaux</span>
-                <span class="dd-chevron"></span>
-              </button>
-              <ul class="dd-menu" role="listbox" hidden>
-                <li class="dd-opt" role="option" data-value="all" aria-selected="true">Tous créneaux</li>
-                <li class="dd-opt" role="option" data-value="morning" aria-selected="false">Matin (avant 12h)</li>
-                <li class="dd-opt" role="option" data-value="afternoon" aria-selected="false">Après-midi (12h–18h)</li>
-                <li class="dd-opt" role="option" data-value="evening" aria-selected="false">Soir (après 18h)</li>
-              </ul>
+          <div id="date-label"></div>
+          <input id="search" type="search" placeholder="Film, réalisateur, ou cinéma…" autocomplete="off">
+          <div id="filters">
+            <div id="tabs">
+              <button class="tab active" data-tab="all">Tous les films</button>
+              <button class="tab" data-tab="cultes">Films cultes</button>
+              <button class="tab" data-tab="villette">Ciné plein air</button>
+              <button class="tab" data-tab="watchlist">Ma liste</button>
             </div>
-            <div class="dd" id="version-filter-dd" data-value="all">
-              <button type="button" class="dd-trigger" aria-haspopup="listbox" aria-expanded="false">
-                <span class="dd-label">VF / VO</span>
-                <span class="dd-chevron"></span>
-              </button>
-              <ul class="dd-menu" role="listbox" hidden>
-                <li class="dd-opt" role="option" data-value="all" aria-selected="true">VF / VO</li>
-                <li class="dd-opt" role="option" data-value="vo" aria-selected="false">VO</li>
-                <li class="dd-opt" role="option" data-value="vf" aria-selected="false">VF</li>
-              </ul>
+            <div id="showtime-filters">
+              <div class="dd" id="time-filter-dd" data-value="all">
+                <button type="button" class="dd-trigger" aria-haspopup="listbox" aria-expanded="false">
+                  <span class="dd-label">Tous créneaux</span>
+                  <span class="dd-chevron"></span>
+                </button>
+                <ul class="dd-menu" role="listbox" hidden>
+                  <li class="dd-opt" role="option" data-value="all" aria-selected="true">Tous créneaux</li>
+                  <li class="dd-opt" role="option" data-value="morning" aria-selected="false">Matin (avant 12h)</li>
+                  <li class="dd-opt" role="option" data-value="afternoon" aria-selected="false">Après-midi (12h–18h)</li>
+                  <li class="dd-opt" role="option" data-value="evening" aria-selected="false">Soir (après 18h)</li>
+                </ul>
+              </div>
+              <div class="dd" id="version-filter-dd" data-value="all">
+                <button type="button" class="dd-trigger" aria-haspopup="listbox" aria-expanded="false">
+                  <span class="dd-label">VF / VO</span>
+                  <span class="dd-chevron"></span>
+                </button>
+                <ul class="dd-menu" role="listbox" hidden>
+                  <li class="dd-opt" role="option" data-value="all" aria-selected="true">VF / VO</li>
+                  <li class="dd-opt" role="option" data-value="vo" aria-selected="false">VO</li>
+                  <li class="dd-opt" role="option" data-value="vf" aria-selected="false">VF</li>
+                </ul>
+              </div>
             </div>
           </div>
+        </header>
+        <div id="status"></div>
+        <div id="sort-bar">
+          <button class="sort-btn active" data-sort="alpha">A → Z</button>
+          <button class="sort-btn" data-sort="year">Année ↓</button>
+          <button class="sort-btn" data-sort="imdb">IMDb ↓</button>
+          <div id="view-toggle">
+            <button class="view-btn active" data-view="list" title="Vue liste">☰</button>
+            <button class="view-btn" data-view="grid" title="Vue grille">▦</button>
+          </div>
         </div>
-      </header>
-      <div id="status"></div>
-      <div id="sort-bar">
-        <button class="sort-btn active" data-sort="alpha">A → Z</button>
-        <button class="sort-btn" data-sort="year">Année ↓</button>
-        <button class="sort-btn" data-sort="imdb">IMDb ↓</button>
       </div>
       <ul id="movie-list"></ul>
       <div id="villette-list"></div>
@@ -80,6 +86,7 @@
       </footer>
     </div>
   </div>
+  <button id="back-to-top" title="Retour en haut" aria-label="Retour en haut">↑</button>
   <script src="app.js"></script>
 </body>
 </html>

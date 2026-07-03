@@ -8,7 +8,7 @@
 <body>
   <header>
     <div id="header-top">
-      <h1>Paris Ciné</h1>
+      <h1 id="brand-title" title="Retour en haut">Paris Ciné</h1>
       <span id="imdb-legend">★ note IMDb</span>
     </div>
     <div id="date-label"></div>
@@ -40,6 +40,10 @@
     <button class="sort-btn active" data-sort="alpha">A → Z</button>
     <button class="sort-btn" data-sort="year">Année ↓</button>
     <button class="sort-btn" data-sort="imdb">IMDb ↓</button>
+    <div id="view-toggle">
+      <button class="view-btn active" data-view="list" title="Vue liste">☰</button>
+      <button class="view-btn" data-view="grid" title="Vue grille">▦</button>
+    </div>
   </div>
   <ul id="movie-list"></ul>
   <div id="villette-list"></div>
@@ -48,6 +52,7 @@
     <span id="count-label"></span>
     · <span id="footer-source">données non officielles <a href="https://www.paris-cine.info" target="_blank" rel="noopener">paris-cine.info</a></span>
   </footer>
+  <button id="back-to-top" title="Retour en haut" aria-label="Retour en haut">↑</button>
   <script src="popup.js"></script>
 </body>
 </html>

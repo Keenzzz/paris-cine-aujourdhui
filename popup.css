@@ -4,12 +4,14 @@ body {
   margin: 0;
   width: 420px;
   max-height: 620px;
+  overflow: hidden;
   font-family: -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
   font-size: 13px;
   color: #1a1a1a;
   background: #fafafa;
   display: flex;
   flex-direction: column;
+  position: relative;
 }
 
 header {
@@ -31,6 +33,7 @@ header h1 {
   margin: 0;
   font-size: 15px;
   letter-spacing: 0.5px;
+  cursor: pointer;
 }
 
 #imdb-legend {
@@ -153,6 +156,7 @@ header h1 {
   padding: 0;
   overflow-y: auto;
   flex: 1;
+  min-height: 0;
 }
 
 .movie {
@@ -160,7 +164,6 @@ header h1 {
   gap: 8px;
   padding: 8px 12px;
   border-bottom: 1px solid #eee;
-  cursor: pointer;
 }
 
 .movie:hover {
@@ -179,6 +182,17 @@ header h1 {
   border-radius: 3px;
   background: #ddd;
   flex-shrink: 0;
+}
+
+.poster-loading {
+  background: linear-gradient(90deg, #e2e2e2 25%, #f0f0f0 37%, #e2e2e2 63%);
+  background-size: 400% 100%;
+  animation: poster-shimmer 1.4s ease infinite;
+}
+
+@keyframes poster-shimmer {
+  0%   { background-position: 100% 50%; }
+  100% { background-position: 0 50%; }
 }
 
 .movie-main {
@@ -321,11 +335,28 @@ header h1 {
   display: none;
   overflow-y: auto;
   flex: 1;
+  min-height: 0;
 }
 
 .watchlist-entry {
+  display: flex;
+  gap: 8px;
   padding: 10px 12px;
   border-bottom: 1px solid #eee;
+}
+
+.watchlist-entry img.poster {
+  width: 40px;
+  height: 58px;
+  object-fit: cover;
+  border-radius: 3px;
+  background: #ddd;
+  flex-shrink: 0;
+}
+
+.watchlist-main {
+  flex: 1;
+  min-width: 0;
 }
 
 .watchlist-title {
@@ -466,6 +497,89 @@ header h1 {
   color: #666;
 }
 
+#movie-list.grid-view,
+#watchlist-list.grid-view {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(78px, 1fr));
+  gap: 8px;
+  padding: 10px;
+}
+
+#movie-list.grid-view .movie,
+#watchlist-list.grid-view .watchlist-entry {
+  position: relative;
+  display: block;
+  padding: 0;
+  border-bottom: none;
+  aspect-ratio: 2 / 3;
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+#movie-list.grid-view .movie:hover,
+#watchlist-list.grid-view .watchlist-entry:hover {
+  background: none;
+}
+
+#movie-list.grid-view .movie.hidden,
+#movie-list.grid-view .movie.time-hidden {
+  display: none;
+}
+
+#movie-list.grid-view .movie img.poster,
+#watchlist-list.grid-view .watchlist-entry img.poster {
+  width: 100%;
+  height: 100%;
+  border-radius: 6px;
+}
+
+#movie-list.grid-view .movie-main,
+#watchlist-list.grid-view .watchlist-main {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  padding: 6px;
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.9) 0%, rgba(0, 0, 0, 0.6) 55%, transparent 100%);
+  color: #fff;
+  opacity: 0;
+  overflow-y: auto;
+  transition: opacity 0.15s;
+}
+
+#movie-list.grid-view .movie:hover .movie-main,
+#watchlist-list.grid-view .watchlist-entry:hover .watchlist-main {
+  opacity: 1;
+}
+
+#movie-list.grid-view .movie-title,
+#movie-list.grid-view .movie-original-title,
+#movie-list.grid-view .movie-meta,
+#watchlist-list.grid-view .watchlist-title,
+#watchlist-list.grid-view .watchlist-original,
+#watchlist-list.grid-view .watchlist-meta,
+#watchlist-list.grid-view .watchlist-saved {
+  color: #fff;
+  font-size: 10px;
+}
+
+#movie-list.grid-view .showtime-panel,
+#watchlist-list.grid-view .showtime-panel {
+  font-size: 10px;
+}
+
+#movie-list.grid-view .day-tab,
+#watchlist-list.grid-view .day-tab {
+  color: #ddd;
+  border-color: rgba(255, 255, 255, 0.35);
+}
+
+#movie-list.grid-view .showtimes a,
+#watchlist-list.grid-view .showtimes a {
+  color: #8fc0ff;
+}
+
 footer {
   padding: 6px 12px;
   font-size: 10px;
@@ -476,4 +590,64 @@ footer {
 
 footer a {
   color: #888;
+}
+
+#back-to-top {
+  position: fixed;
+  right: 14px;
+  bottom: 14px;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  border: none;
+  background: #ffd400;
+  color: #111;
+  font-size: 16px;
+  font-weight: 700;
+  line-height: 1;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 5;
+  opacity: 0.92;
+  transition: opacity 0.15s, transform 0.15s;
+}
+
+#back-to-top:hover {
+  opacity: 1;
+  transform: translateY(-1px);
+}
+
+#back-to-top.visible {
+  display: flex;
+}
+
+#view-toggle {
+  display: flex;
+  gap: 4px;
+  margin-left: auto;
+}
+
+.view-btn {
+  background: none;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 11px;
+  color: #aaa;
+  padding: 1px 6px;
+  transition: color 0.15s, border-color 0.15s, background 0.15s;
+}
+
+.view-btn:hover {
+  color: #555;
+  border-color: #bbb;
+}
+
+.view-btn.active {
+  color: #111;
+  background: #eee;
+  border-color: #ccc;
 }
