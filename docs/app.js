@@ -95,7 +95,49 @@ let watchlist     = [];
 let _searchToken  = 0;
 
 let movieListEl, villetteListEl, watchlistEl, countLabelEl, searchEl;
-let timeFilterEl, versionFilterEl, showtimeFiltersEl, sortBarEl, footerSourceEl;
+let showtimeFiltersEl, sortBarEl, footerSourceEl;
+
+function initDropdown(rootEl, onSelect) {
+  const trigger = rootEl.querySelector(".dd-trigger");
+  const label = rootEl.querySelector(".dd-label");
+  const menu = rootEl.querySelector(".dd-menu");
+  const options = Array.from(menu.querySelectorAll(".dd-opt"));
+
+  function close() {
+    menu.hidden = true;
+    trigger.setAttribute("aria-expanded", "false");
+  }
+  function open() {
+    for (const other of document.querySelectorAll(".dd-menu")) {
+      if (other !== menu) { other.hidden = true; }
+    }
+    menu.hidden = false;
+    trigger.setAttribute("aria-expanded", "true");
+  }
+
+  trigger.addEventListener("click", (e) => {
+    e.stopPropagation();
+    if (menu.hidden) open(); else close();
+  });
+
+  for (const opt of options) {
+    opt.addEventListener("click", () => {
+      for (const o of options) o.setAttribute("aria-selected", "false");
+      opt.setAttribute("aria-selected", "true");
+      label.textContent = opt.textContent;
+      rootEl.dataset.value = opt.dataset.value;
+      close();
+      onSelect(opt.dataset.value);
+    });
+  }
+
+  document.addEventListener("click", (e) => {
+    if (!rootEl.contains(e.target)) close();
+  });
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape" && !menu.hidden) close();
+  });
+}
 
 function todayISO() {
   const d = new Date();
@@ -751,8 +793,6 @@ async function init() {
   const dateLabelEl = document.getElementById("date-label");
   countLabelEl      = document.getElementById("count-label");
   searchEl          = document.getElementById("search");
-  timeFilterEl      = document.getElementById("time-filter");
-  versionFilterEl   = document.getElementById("version-filter");
   showtimeFiltersEl = document.getElementById("showtime-filters");
   sortBarEl         = document.getElementById("sort-bar");
   footerSourceEl    = document.getElementById("footer-source");
@@ -804,13 +844,13 @@ async function init() {
     });
   }
 
-  timeFilterEl.addEventListener("change", () => {
-    activeWindow = timeFilterEl.value;
+  initDropdown(document.getElementById("time-filter-dd"), (value) => {
+    activeWindow = value;
     applyShowtimeFilters();
   });
 
-  versionFilterEl.addEventListener("change", () => {
-    activeVersion = versionFilterEl.value;
+  initDropdown(document.getElementById("version-filter-dd"), (value) => {
+    activeVersion = value;
     applyShowtimeFilters();
   });
 

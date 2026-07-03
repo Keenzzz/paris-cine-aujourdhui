@@ -39,17 +39,29 @@
             <button class="tab" data-tab="watchlist">Ma liste</button>
           </div>
           <div id="showtime-filters">
-            <select id="time-filter">
-              <option value="all">Tous créneaux</option>
-              <option value="morning">Matin (avant 12h)</option>
-              <option value="afternoon">Après-midi (12h–18h)</option>
-              <option value="evening">Soir (après 18h)</option>
-            </select>
-            <select id="version-filter">
-              <option value="all">VF / VO</option>
-              <option value="vo">VO</option>
-              <option value="vf">VF</option>
-            </select>
+            <div class="dd" id="time-filter-dd" data-value="all">
+              <button type="button" class="dd-trigger" aria-haspopup="listbox" aria-expanded="false">
+                <span class="dd-label">Tous créneaux</span>
+                <span class="dd-chevron"></span>
+              </button>
+              <ul class="dd-menu" role="listbox" hidden>
+                <li class="dd-opt" role="option" data-value="all" aria-selected="true">Tous créneaux</li>
+                <li class="dd-opt" role="option" data-value="morning" aria-selected="false">Matin (avant 12h)</li>
+                <li class="dd-opt" role="option" data-value="afternoon" aria-selected="false">Après-midi (12h–18h)</li>
+                <li class="dd-opt" role="option" data-value="evening" aria-selected="false">Soir (après 18h)</li>
+              </ul>
+            </div>
+            <div class="dd" id="version-filter-dd" data-value="all">
+              <button type="button" class="dd-trigger" aria-haspopup="listbox" aria-expanded="false">
+                <span class="dd-label">VF / VO</span>
+                <span class="dd-chevron"></span>
+              </button>
+              <ul class="dd-menu" role="listbox" hidden>
+                <li class="dd-opt" role="option" data-value="all" aria-selected="true">VF / VO</li>
+                <li class="dd-opt" role="option" data-value="vo" aria-selected="false">VO</li>
+                <li class="dd-opt" role="option" data-value="vf" aria-selected="false">VF</li>
+              </ul>
+            </div>
           </div>
         </div>
       </header>
