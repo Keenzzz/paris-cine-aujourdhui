@@ -77,6 +77,18 @@ a { color: inherit; }
   border: 1px solid #2c2619;
   border-radius: 4px;
   overflow: hidden;
+  cursor: pointer;
+  transition: border-color 0.15s, box-shadow 0.2s;
+}
+
+.rail-feat:hover {
+  border-color: #4f8f80;
+  box-shadow: 0 0 14px rgba(79, 143, 128, 0.25);
+}
+
+.rail-feat:focus-visible {
+  outline: 2px solid #4f8f80;
+  outline-offset: 2px;
 }
 
 .rail-feat img.poster {
@@ -111,9 +123,20 @@ a { color: inherit; }
 }
 
 .rail-villette-item {
+  display: block;
   font-size: 11.5px;
   color: #d8cfba;
   line-height: 1.5;
+  text-decoration: none;
+}
+
+.rail-villette-item .t {
+  transition: color 0.15s;
+}
+
+.rail-villette-item:hover .t {
+  color: #7bcabb;
+  text-decoration: underline;
 }
 
 .rail-villette-item .d {

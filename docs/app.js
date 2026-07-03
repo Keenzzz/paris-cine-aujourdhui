@@ -2,6 +2,7 @@ const API_BASE = "/proxy";
 const CACHE_KEY      = "pci_movies_cache";
 const WATCHLIST_KEY  = "pci_watchlist";
 const CULTES_CUTOFF = 2017;
+const VILLETTE_INFO_URL = "https://www.lavillette.com/manifestations/cinema-en-plein-air-26/";
 
 const storage = {
   async get(key) {
@@ -598,7 +599,7 @@ function renderVilletteList() {
     const titleLine = document.createElement("div");
     titleLine.className = "villette-title";
     const titleLink = document.createElement("a");
-    titleLink.href = "https://www.lavillette.com/manifestations/cinema-en-plein-air-26/";
+    titleLink.href = VILLETTE_INFO_URL;
     titleLink.target = "_blank";
     titleLink.rel = "noopener noreferrer";
     titleLink.textContent = `${f.title} (${f.year})`;
@@ -628,6 +629,22 @@ function renderVilletteList() {
 
 // ── Rail (colonne latérale) ─────────────────────────────────────────────────
 
+function openMovieFromRail(movieId) {
+  const allTabBtn = document.querySelector('.tab[data-tab="all"]');
+  if (activeTab !== "all" && allTabBtn) allTabBtn.click();
+  if (searchEl.value.trim() !== "") {
+    searchEl.value = "";
+    applyFilters();
+  }
+  const target = movieListEl.querySelector(`[data-movie-id="${movieId}"]`);
+  if (!target) return;
+  target.scrollIntoView({ behavior: "smooth", block: "center" });
+  const panel = target.querySelector(".showtime-panel");
+  if (panel && !panel.classList.contains("open")) {
+    target.click();
+  }
+}
+
 function renderRailFeature(movies) {
   const block = document.getElementById("rail-feature-block");
   const el = document.getElementById("rail-feature");
@@ -638,6 +655,8 @@ function renderRailFeature(movies) {
   }
   const top = rated.reduce((best, m) => (parseFloat(m.im_r) > parseFloat(best.im_r) ? m : best));
   el.innerHTML = "";
+  el.setAttribute("role", "button");
+  el.setAttribute("tabindex", "0");
   const img = document.createElement("img");
   img.className = "poster";
   img.loading = "lazy";
@@ -655,6 +674,10 @@ function renderRailFeature(movies) {
   meta.textContent = [top.di, `★ ${top.im_r}`, top.du].filter(Boolean).join(" · ");
   body.appendChild(meta);
   el.appendChild(body);
+  el.onclick = () => openMovieFromRail(top.id);
+  el.onkeydown = (e) => {
+    if (e.key === "Enter" || e.key === " ") { e.preventDefault(); openMovieFromRail(top.id); }
+  };
 }
 
 function renderRailVillette() {
@@ -667,18 +690,22 @@ function renderRailVillette() {
   }
   el.innerHTML = "";
   for (const f of upcoming) {
-    const div = document.createElement("div");
-    div.className = "rail-villette-item";
+    const link = document.createElement("a");
+    link.className = "rail-villette-item";
+    link.href = VILLETTE_INFO_URL;
+    link.target = "_blank";
+    link.rel = "noopener noreferrer";
     const d = new Date(f.date + "T12:00:00");
     const dateStr = d.toLocaleDateString("fr-FR", { day: "numeric", month: "short" });
     const title = document.createElement("div");
+    title.className = "t";
     title.textContent = f.title;
     const meta = document.createElement("span");
     meta.className = "d";
     meta.textContent = `La Villette · ${dateStr} · ${f.jeune ? "18h00" : "21h00"}`;
-    div.appendChild(title);
-    div.appendChild(meta);
-    el.appendChild(div);
+    link.appendChild(title);
+    link.appendChild(meta);
+    el.appendChild(link);
   }
 }
 
