@@ -193,11 +193,22 @@ header {
   border-bottom: 2px solid transparent;
   cursor: pointer;
   white-space: nowrap;
+  transition: color 0.15s, text-shadow 0.2s;
+}
+
+.tab:hover {
+  color: #d8cfba;
+  text-shadow: 0 0 10px rgba(224, 169, 68, 0.45);
 }
 
 .tab.active {
   color: #e0a944;
   border-bottom-color: #e0a944;
+}
+
+.tab.active:hover {
+  color: #f0c168;
+  text-shadow: 0 0 12px rgba(224, 169, 68, 0.7);
 }
 
 #showtime-filters {
@@ -208,17 +219,33 @@ header {
 #time-filter,
 #version-filter {
   flex: 1;
-  padding: 4px 0;
+  padding: 4px 18px 4px 0;
   border: none;
   border-bottom: 1px solid #241f18;
   border-radius: 0;
   font-size: 11px;
-  background: transparent;
+  background-color: transparent;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%23a89d84' fill='none' stroke-width='1.4' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right center;
   color: #a89d84;
   cursor: pointer;
   appearance: none;
   -webkit-appearance: none;
   text-align: left;
+  transition: color 0.15s, border-color 0.15s;
+}
+
+#time-filter:hover,
+#version-filter:hover {
+  color: #d8cfba;
+  border-bottom-color: #4f8f80;
+}
+
+#time-filter option,
+#version-filter option {
+  background: #1c1811;
+  color: #f3ede0;
 }
 
 #status {
@@ -248,11 +275,22 @@ header {
   color: #695f4c;
   padding: 0;
   font-weight: 600;
+  transition: color 0.15s, text-shadow 0.2s;
+}
+
+.sort-btn:hover {
+  color: #d8cfba;
+  text-shadow: 0 0 8px rgba(224, 169, 68, 0.4);
 }
 
 .sort-btn.active {
   color: #e0a944;
   font-weight: 700;
+}
+
+.sort-btn.active:hover {
+  color: #f0c168;
+  text-shadow: 0 0 10px rgba(224, 169, 68, 0.65);
 }
 
 #movie-list {
@@ -321,6 +359,7 @@ header {
   border-color: #d9603b;
   color: #d9603b;
   background: rgba(217, 96, 59, 0.1);
+  box-shadow: 0 0 10px rgba(217, 96, 59, 0.35);
 }
 
 .bookmark-btn.bookmarked {
@@ -377,16 +416,22 @@ header {
   text-transform: uppercase;
   cursor: pointer;
   color: #8f8570;
+  transition: color 0.15s, text-shadow 0.2s;
 }
 
 .day-tab:hover:not(.active) {
   color: #d8cfba;
+  text-shadow: 0 0 8px rgba(224, 169, 68, 0.4);
 }
 
 .day-tab.active {
   background: none;
   color: #4f8f80;
   border-bottom-color: #4f8f80;
+}
+
+.day-tab.active:hover {
+  text-shadow: 0 0 10px rgba(79, 143, 128, 0.6);
 }
 
 .showtimes {
@@ -409,18 +454,23 @@ header {
 }
 
 .showtimes a {
-  color: #d8cfba;
+  color: #9a917c;
   text-decoration: none;
   display: flex;
   gap: 8px;
   flex: 1;
+  transition: color 0.15s;
 }
-
-.showtimes a::first-line { color: #e0a944; }
 
 .showtimes .theatre {
   font-weight: 600;
-  color: #d8cfba;
+  color: #5fb0a0;
+  transition: color 0.15s;
+}
+
+.showtimes a:hover .theatre {
+  color: #7bcabb;
+  text-decoration: underline;
 }
 
 .showtimes .lang-badge {
@@ -476,6 +526,7 @@ header {
   border-color: #d9603b;
   color: #d9603b;
   background: rgba(217, 96, 59, 0.1);
+  box-shadow: 0 0 10px rgba(217, 96, 59, 0.35);
 }
 
 .watchlist-original {
@@ -573,12 +624,13 @@ header {
 }
 
 .villette-title a {
-  color: #d8cfba;
+  color: #5fb0a0;
   text-decoration: none;
 }
 
 .villette-title a:hover {
-  color: #f6efe1;
+  color: #7bcabb;
+  text-decoration: underline;
 }
 
 .villette-meta {
