@@ -380,6 +380,9 @@ function renderWatchlist() {
     const main = document.createElement("div");
     main.className = "watchlist-main";
 
+    const info = document.createElement("div");
+    info.className = "watchlist-info";
+
     const titleLine = document.createElement("div");
     titleLine.className = "watchlist-title";
     const titleText = document.createElement("span");
@@ -404,23 +407,24 @@ function renderWatchlist() {
       renderWatchlist();
     });
     titleLine.appendChild(removeBtn);
-    main.appendChild(titleLine);
+    info.appendChild(titleLine);
 
     if (m.o_ti && m.o_ti !== m.ti) {
       const original = document.createElement("div");
       original.className = "watchlist-original";
       original.textContent = m.o_ti;
-      main.appendChild(original);
+      info.appendChild(original);
     }
     const meta = document.createElement("div");
     meta.className = "watchlist-meta";
     meta.textContent = [m.di, m.ye].filter(Boolean).join(" · ");
-    main.appendChild(meta);
+    info.appendChild(meta);
 
     const savedDate = document.createElement("div");
     savedDate.className = "watchlist-saved";
     savedDate.textContent = `Épinglé le ${new Date(m.savedAt + "T12:00:00").toLocaleDateString("fr-FR", { day: "numeric", month: "long" })}`;
-    main.appendChild(savedDate);
+    info.appendChild(savedDate);
+    main.appendChild(info);
 
     const panel = document.createElement("div");
     panel.className = "showtime-panel open";
@@ -453,6 +457,9 @@ function buildMovieRow(movie) {
   const main = document.createElement("div");
   main.className = "movie-main";
 
+  const info = document.createElement("div");
+  info.className = "movie-info";
+
   const titleDiv = document.createElement("div");
   titleDiv.className = "movie-title";
   const titleText = document.createElement("span");
@@ -475,19 +482,20 @@ function buildMovieRow(movie) {
     toggleBookmark(movie, bookmarkBtn);
   });
   titleDiv.appendChild(bookmarkBtn);
-  main.appendChild(titleDiv);
+  info.appendChild(titleDiv);
 
   if (movie.o_ti && movie.o_ti !== movie.ti) {
     const original = document.createElement("div");
     original.className = "movie-original-title";
     original.textContent = movie.o_ti;
-    main.appendChild(original);
+    info.appendChild(original);
   }
 
   const meta = document.createElement("div");
   meta.className = "movie-meta";
   meta.textContent = [movie.di, genreLabels(movie.ge), movie.du, movie.ye].filter(Boolean).join(" · ");
-  main.appendChild(meta);
+  info.appendChild(meta);
+  main.appendChild(info);
 
   const panel = document.createElement("div");
   panel.className = "showtime-panel open";
