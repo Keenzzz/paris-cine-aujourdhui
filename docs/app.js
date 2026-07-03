@@ -764,6 +764,7 @@ function setView(view) {
   }
   movieListEl.classList.toggle("grid-view", view === "grid");
   watchlistEl.classList.toggle("grid-view", view === "grid");
+  document.getElementById("layout").classList.toggle("grid-mode", view === "grid");
 }
 
 // ── Scroll to top ─────────────────────────────────────────────────────────────

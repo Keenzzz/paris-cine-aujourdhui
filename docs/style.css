@@ -13,9 +13,17 @@ a { color: inherit; }
 #layout {
   display: grid;
   grid-template-columns: 240px 1fr;
-  max-width: 960px;
+  max-width: 1400px;
   margin: 0 auto;
   min-height: 100vh;
+}
+
+#layout.grid-mode {
+  grid-template-columns: 1fr;
+}
+
+#layout.grid-mode #rail {
+  display: none;
 }
 
 /* ── Rail (colonne latérale) ──────────────────────────────────────────── */
@@ -823,7 +831,7 @@ footer a {
 #movie-list.grid-view,
 #watchlist-list.grid-view {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(120px, 160px));
   gap: 16px;
   padding: 20px 28px;
 }
@@ -880,9 +888,7 @@ footer a {
   font-size: 13px;
 }
 
-#movie-list.grid-view .movie-original-title,
 #movie-list.grid-view .movie-meta,
-#watchlist-list.grid-view .watchlist-original,
 #watchlist-list.grid-view .watchlist-meta,
 #watchlist-list.grid-view .watchlist-saved {
   font-size: 10.5px;
@@ -891,6 +897,13 @@ footer a {
 #movie-list.grid-view .showtimes,
 #watchlist-list.grid-view .showtimes {
   max-width: none;
+}
+
+#movie-list.grid-view .movie-original-title,
+#watchlist-list.grid-view .watchlist-original,
+#movie-list.grid-view .day-tabs,
+#watchlist-list.grid-view .day-tabs {
+  display: none;
 }
 
 /* ── Responsive : le rail passe au-dessus du contenu ─────────────────── */
