@@ -1021,6 +1021,10 @@ footer a {
 
   #rail-feature-block { max-width: none; }
 
+  #rail-villette-block {
+    text-align: center;
+  }
+
   header, #status, #sort-bar, .movie, .watchlist-entry, .villette-entry, .villette-date, footer {
     padding-left: 18px;
     padding-right: 18px;
