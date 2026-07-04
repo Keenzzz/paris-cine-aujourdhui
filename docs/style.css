@@ -18,14 +18,6 @@ a { color: inherit; }
   min-height: 100vh;
 }
 
-#layout.grid-mode {
-  grid-template-columns: 1fr;
-}
-
-#layout.grid-mode #rail {
-  display: none;
-}
-
 /* ── Rail (colonne latérale) ──────────────────────────────────────────── */
 
 #rail {
