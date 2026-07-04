@@ -910,7 +910,7 @@ footer a {
 #watchlist-list.tab-active.grid-view {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(150px, 210px));
-  justify-content: start;
+  justify-content: center;
   gap: 18px;
   padding: 20px 28px;
 }
