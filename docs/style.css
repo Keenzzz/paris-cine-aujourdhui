@@ -649,6 +649,31 @@ header {
   font-style: italic;
 }
 
+.showtimes li.showtimes-more {
+  padding: 0;
+  border-style: dashed;
+  background: transparent;
+}
+
+.showtimes-more-btn {
+  all: unset;
+  padding: 5px 12px;
+  cursor: pointer;
+  color: #9a917c;
+  font-size: 12px;
+  transition: color 0.15s;
+}
+
+.showtimes-more-btn:hover {
+  color: #7bcabb;
+}
+
+.showtimes-more-btn:focus-visible {
+  outline: 2px solid #4f8f80;
+  outline-offset: 2px;
+  border-radius: 20px;
+}
+
 #movie-list,
 #villette-list,
 #watchlist-list {

@@ -2,6 +2,7 @@ const API_BASE = "/proxy";
 const CACHE_KEY      = "pci_movies_cache";
 const WATCHLIST_KEY  = "pci_watchlist";
 const CULTES_CUTOFF = 2017;
+const SHOWTIMES_REVEAL_COUNT = 2;
 const VILLETTE_INFO_URL = "https://www.lavillette.com/manifestations/cinema-en-plein-air-26/";
 
 const storage = {
@@ -298,6 +299,28 @@ function updateCount() {
   countLabelEl.textContent = `${visible} film${visible !== 1 ? "s" : ""} aujourd'hui${cinemaPart}`;
 }
 
+function buildShowtimeRow(s) {
+  const time = s.start.slice(11, 16);
+  const row = document.createElement("li");
+  const link = document.createElement("a");
+  link.href = s.book || API_BASE;
+  link.target = "_blank";
+  link.rel = "noopener noreferrer";
+  link.textContent = `${time} — `;
+  const theatreSpan = document.createElement("span");
+  theatreSpan.className = "theatre";
+  theatreSpan.textContent = s.title;
+  link.appendChild(theatreSpan);
+  row.appendChild(link);
+  if (s.type) {
+    const lang = document.createElement("span");
+    lang.className = "lang-badge";
+    lang.textContent = s.type;
+    row.appendChild(lang);
+  }
+  return row;
+}
+
 function renderShowtimesList(showtimesEl, showtimes) {
   showtimesEl.innerHTML = "";
   const noFilter = activeWindow === "all" && activeVersion === "all";
@@ -309,26 +332,26 @@ function renderShowtimesList(showtimesEl, showtimes) {
     showtimesEl.appendChild(emptyLi);
     return;
   }
-  for (const s of filtered) {
-    const time = s.start.slice(11, 16);
-    const row = document.createElement("li");
-    const link = document.createElement("a");
-    link.href = s.book || API_BASE;
-    link.target = "_blank";
-    link.rel = "noopener noreferrer";
-    link.textContent = `${time} — `;
-    const theatreSpan = document.createElement("span");
-    theatreSpan.className = "theatre";
-    theatreSpan.textContent = s.title;
-    link.appendChild(theatreSpan);
-    row.appendChild(link);
-    if (s.type) {
-      const lang = document.createElement("span");
-      lang.className = "lang-badge";
-      lang.textContent = s.type;
-      row.appendChild(lang);
-    }
-    showtimesEl.appendChild(row);
+
+  const hasOverflow = filtered.length > SHOWTIMES_REVEAL_COUNT;
+  const shown = hasOverflow ? filtered.slice(0, SHOWTIMES_REVEAL_COUNT) : filtered;
+  for (const s of shown) showtimesEl.appendChild(buildShowtimeRow(s));
+
+  if (hasOverflow) {
+    const hidden = filtered.slice(SHOWTIMES_REVEAL_COUNT);
+    const moreLi = document.createElement("li");
+    moreLi.className = "showtimes-more";
+    const moreBtn = document.createElement("button");
+    moreBtn.type = "button";
+    moreBtn.className = "showtimes-more-btn";
+    moreBtn.textContent = `Voir ${hidden.length} séance${hidden.length !== 1 ? "s" : ""} de plus`;
+    moreBtn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      moreLi.remove();
+      for (const s of hidden) showtimesEl.appendChild(buildShowtimeRow(s));
+    });
+    moreLi.appendChild(moreBtn);
+    showtimesEl.appendChild(moreLi);
   }
 }
 
