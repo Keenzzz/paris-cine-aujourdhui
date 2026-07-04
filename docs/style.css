@@ -19,7 +19,7 @@ a { color: inherit; }
   display: grid;
   grid-template-columns: 300px 1fr;
   max-width: 1400px;
-  margin: 0 auto 0 0;
+  margin: 0 auto;
   min-height: 100vh;
 }
 
