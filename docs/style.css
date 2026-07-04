@@ -239,16 +239,26 @@ header {
 
 #search {
   width: 100%;
-  padding: 0 2px 8px;
-  border: none;
-  border-bottom: 1px solid #332c20;
-  background: transparent;
+  padding: 9px 14px;
+  border: 1px solid #2c2619;
+  border-radius: 7px;
+  background: #1c1811;
   color: #f3ede0;
   font-size: 13px;
   outline: none;
+  transition: border-color 0.15s, box-shadow 0.15s;
 }
 
-#search::placeholder { color: #6f6656; }
+#search:hover {
+  border-color: #4f8f80;
+}
+
+#search:focus {
+  border-color: #e0a944;
+  box-shadow: 0 0 10px rgba(224, 169, 68, 0.2);
+}
+
+#search::placeholder { color: #7f7663; }
 
 #filters {
   display: flex;
