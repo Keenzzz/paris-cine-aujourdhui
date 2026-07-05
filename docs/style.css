@@ -216,31 +216,25 @@ a { color: inherit; }
 }
 
 #cine-map {
-  height: 320px;
+  height: 260px;
   border-radius: 6px;
   border: 1px solid #2c2619;
   background: #1c1811;
 }
 
-#map-legend {
-  font-size: 10px;
-  color: #7f7663;
+.cine-pin span {
   display: flex;
   align-items: center;
-  gap: 6px;
-  flex-wrap: wrap;
-}
-
-.map-legend-dot {
-  display: inline-block;
-  width: 8px;
-  height: 8px;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
   border-radius: 50%;
-  margin-left: 8px;
-}
-
-.map-legend-dot:first-child {
-  margin-left: 0;
+  background: #e0a944;
+  color: #1b1610;
+  font-weight: 700;
+  font-size: 10px;
+  font-family: "Segoe UI", -apple-system, system-ui, Roboto, Arial, sans-serif;
+  box-shadow: 0 0 0 1px #15130f;
 }
 
 #map-panel {
@@ -266,15 +260,19 @@ a { color: inherit; }
   margin: 0 0 10px;
 }
 
-.leaflet-popup-content-wrapper,
-.leaflet-popup-tip {
+.leaflet-tooltip {
   background: #1c1811;
   color: #f3ede0;
+  border: 1px solid #332c20;
+  font-size: 11px;
+  font-family: "Segoe UI", -apple-system, system-ui, Roboto, Arial, sans-serif;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.4);
 }
 
-.leaflet-container a.leaflet-popup-close-button {
-  color: #9a917c;
-}
+.leaflet-tooltip-top:before   { border-top-color: #332c20; }
+.leaflet-tooltip-bottom:before { border-bottom-color: #332c20; }
+.leaflet-tooltip-left:before  { border-left-color: #332c20; }
+.leaflet-tooltip-right:before { border-right-color: #332c20; }
 
 /* ── Colonne principale ───────────────────────────────────────────────── */
 
@@ -1154,9 +1152,5 @@ footer a {
     position: static;
     max-height: none;
     padding: 18px;
-  }
-
-  #cine-map {
-    height: 260px;
   }
 }

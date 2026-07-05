@@ -919,11 +919,21 @@ function initCineMap() {
   if (cineMap || typeof L === "undefined") return;
   const mapEl = document.getElementById("cine-map");
   if (!mapEl) return;
-  cineMap = L.map(mapEl, { scrollWheelZoom: false }).setView([48.8566, 2.3522], 12);
-  L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-    attribution: "© OpenStreetMap contributors",
-    maxZoom: 19,
+  cineMap = L.map(mapEl, { scrollWheelZoom: false, zoomControl: false }).setView([48.8566, 2.3522], 11.5);
+  L.tileLayer("https://{s}.basemaps.cartocdn.com/dark_nolabels/{z}/{x}/{y}{r}.png", {
+    attribution: '© OpenStreetMap contributors © <a href="https://carto.com/attributions">CARTO</a>',
+    subdomains: "abcd",
+    maxZoom: 20,
   }).addTo(cineMap);
+}
+
+function cinePinIcon(count) {
+  return L.divIcon({
+    className: "cine-pin",
+    html: `<span>${count}</span>`,
+    iconSize: [22, 22],
+    iconAnchor: [11, 11],
+  });
 }
 
 function buildCinemaAggregation() {
@@ -944,17 +954,9 @@ function buildCinemaAggregation() {
   return byCinema;
 }
 
-function markerColor(ratio) {
-  const lo = [0x4f, 0x8f, 0x80];
-  const hi = [0xe0, 0xa9, 0x44];
-  const mix = lo.map((c, i) => Math.round(c + (hi[i] - c) * ratio));
-  return `rgb(${mix.join(",")})`;
-}
-
 function updateCineMapMarkers() {
   if (!cineMap) return;
   const byCinema = buildCinemaAggregation();
-  const maxToday = Math.max(1, ...Array.from(byCinema.values()).map((e) => e.today));
 
   for (const [name, coords] of Object.entries(cinemaCoords)) {
     const entry = byCinema.get(name);
@@ -964,19 +966,15 @@ function updateCineMapMarkers() {
       if (existing) { cineMap.removeLayer(existing); cineMarkers.delete(name); }
       continue;
     }
-    const radius = Math.min(20, 5 + Math.sqrt(count) * 3.2);
-    const color = markerColor(count / maxToday);
     let marker = cineMarkers.get(name);
     if (!marker) {
-      marker = L.circleMarker([coords.lat, coords.lon], {
-        radius, color: "#15130f", weight: 1, fillColor: color, fillOpacity: 0.85,
-      }).addTo(cineMap);
+      marker = L.marker([coords.lat, coords.lon], { icon: cinePinIcon(count) }).addTo(cineMap);
       marker.on("click", () => { selectedCinema = name; renderCinemaPanel(name); });
       cineMarkers.set(name, marker);
     } else {
-      marker.setStyle({ radius, fillColor: color });
+      marker.setIcon(cinePinIcon(count));
     }
-    marker.bindTooltip(`${name} · ${count} séance${count !== 1 ? "s" : ""} aujourd'hui`);
+    marker.bindTooltip(name);
   }
 
   if (selectedCinema) renderCinemaPanel(selectedCinema);
