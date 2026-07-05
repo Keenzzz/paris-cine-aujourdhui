@@ -855,7 +855,7 @@ function renderRailVillette() {
     const dateStr = d.toLocaleDateString("fr-FR", { day: "numeric", month: "short" });
     const title = document.createElement("div");
     title.className = "t";
-    title.textContent = f.title;
+    title.textContent = `${f.title} (${f.year})`;
     const meta = document.createElement("span");
     meta.className = "d";
     meta.textContent = `La Villette · ${dateStr} · ${f.jeune ? "18h00" : "21h00"}`;
