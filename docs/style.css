@@ -285,6 +285,14 @@ a { color: inherit; }
   margin: 0;
 }
 
+#marathon-block {
+  display: none;
+}
+
+#marathon-block.has-combo {
+  display: block;
+}
+
 #marathon-content {
   display: flex;
   flex-direction: column;
@@ -1314,6 +1322,14 @@ footer a {
 
   #map-rail.tab-active {
     display: flex;
+  }
+
+  #marathon-block.has-combo {
+    display: none;
+  }
+
+  #marathon-block.has-combo.tab-active {
+    display: block;
   }
 
   .tab-mobile-only {

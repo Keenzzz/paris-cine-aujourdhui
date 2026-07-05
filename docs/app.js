@@ -1199,11 +1199,8 @@ function renderMarathonBlock() {
   const content = document.getElementById("marathon-content");
   if (!block || !content) return;
   const combos = computeMarathonCombos();
-  if (combos.length === 0) {
-    block.style.display = "none";
-    return;
-  }
-  block.style.display = "";
+  block.classList.toggle("has-combo", combos.length > 0);
+  if (combos.length === 0) return;
   content.innerHTML = "";
 
   function buildLeg(leg) {
