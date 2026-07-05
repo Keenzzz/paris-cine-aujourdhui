@@ -17,8 +17,8 @@ a { color: inherit; }
 
 #layout {
   display: grid;
-  grid-template-columns: 300px 1fr 300px;
-  max-width: 1460px;
+  grid-template-columns: 300px 1fr 380px;
+  max-width: 1520px;
   margin: 0 auto;
   min-height: 100vh;
 }
