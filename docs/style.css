@@ -274,6 +274,18 @@ a { color: inherit; }
 .leaflet-tooltip-left:before  { border-left-color: #332c20; }
 .leaflet-tooltip-right:before { border-right-color: #332c20; }
 
+.leaflet-control-zoom a {
+  background-color: #1c1811;
+  border-bottom: 1px solid #332c20;
+  color: #d8cfba;
+}
+
+.leaflet-control-zoom a:hover,
+.leaflet-control-zoom a:focus {
+  background-color: #241f18;
+  color: #e0a944;
+}
+
 /* ── Colonne principale ───────────────────────────────────────────────── */
 
 #main {

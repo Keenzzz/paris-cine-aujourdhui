@@ -919,7 +919,7 @@ function initCineMap() {
   if (cineMap || typeof L === "undefined") return;
   const mapEl = document.getElementById("cine-map");
   if (!mapEl) return;
-  cineMap = L.map(mapEl, { scrollWheelZoom: false, zoomControl: false }).setView([48.8566, 2.3522], 11.5);
+  cineMap = L.map(mapEl, { scrollWheelZoom: true, zoomControl: true }).setView([48.8566, 2.3522], 11.5);
   L.tileLayer("https://{s}.basemaps.cartocdn.com/dark_nolabels/{z}/{x}/{y}{r}.png", {
     attribution: '© OpenStreetMap contributors © <a href="https://carto.com/attributions">CARTO</a>',
     subdomains: "abcd",
