@@ -88,11 +88,11 @@ let activeView    = "list";
 let currentDate   = "";
 
 const SORT_LABELS = {
-  alpha: { asc: "A → Z",   desc: "Z → A"   },
-  year:  { asc: "Année ↑", desc: "Année ↓" },
-  imdb:  { asc: "IMDb ↑",  desc: "IMDb ↓"  },
+  alpha:      { asc: "A → Z",        desc: "Z → A"        },
+  year:       { asc: "Année ↑",      desc: "Année ↓"       },
+  letterboxd: { asc: "Letterboxd ↑", desc: "Letterboxd ↓"  },
 };
-const SORT_DEFAULT_DIR = { alpha: "asc", year: "desc", imdb: "desc" };
+const SORT_DEFAULT_DIR = { alpha: "asc", year: "desc", letterboxd: "desc" };
 let watchlist     = [];
 let moviesToday   = [];
 let _searchToken  = 0;
@@ -401,7 +401,7 @@ async function toggleBookmark(movie, btn) {
     btn.title = "Ajouter à Ma liste";
     btn.classList.remove("bookmarked");
   } else {
-    watchlist.push({ id: movie.id, ti: movie.ti, o_ti: movie.o_ti || "", di: movie.di || "", ye: movie.ye || "", im_r: movie.im_r || "", savedAt: currentDate });
+    watchlist.push({ id: movie.id, ti: movie.ti, o_ti: movie.o_ti || "", di: movie.di || "", ye: movie.ye || "", lb_r: movie.lb_r || "", savedAt: currentDate });
     btn.textContent = "♥";
     btn.title = "Retirer de Ma liste";
     btn.classList.add("bookmarked");
@@ -434,7 +434,7 @@ function renderWatchlist() {
     div.className = "watchlist-entry";
     div.dataset.title = m.ti || "";
     div.dataset.year  = m.ye ? String(m.ye) : "0";
-    div.dataset.imdb  = m.im_r ? String(m.im_r) : "0";
+    div.dataset.rating = m.lb_r ? String(m.lb_r) : "0";
     div._showtimes = null;
 
     const poster = createPosterImg(`${API_BASE}/get_poster.php?id=${m.id}`, "poster");
@@ -451,10 +451,10 @@ function renderWatchlist() {
     const titleText = document.createElement("span");
     titleText.textContent = m.ti;
     titleLine.appendChild(titleText);
-    if (m.im_r) {
+    if (m.lb_r) {
       const badge = document.createElement("span");
       badge.className = "movie-rating";
-      badge.textContent = `★ ${m.im_r}`;
+      badge.textContent = `★ ${m.lb_r}`;
       titleLine.appendChild(badge);
     }
     const removeBtn = document.createElement("button");
@@ -512,7 +512,7 @@ function buildMovieRow(movie) {
   li.dataset.year = movie.ye ? String(movie.ye) : "";
   li.dataset.movieId = String(movie.id);
   li.dataset.title = movie.ti || "";
-  li.dataset.imdb = movie.im_r ? String(movie.im_r) : "0";
+  li.dataset.rating = movie.lb_r ? String(movie.lb_r) : "0";
   li._showtimes = null;
 
   const img = createPosterImg(`${API_BASE}/get_poster.php?id=${movie.id}`, "poster");
@@ -530,10 +530,10 @@ function buildMovieRow(movie) {
   titleText.textContent = movie.ti;
   titleDiv.appendChild(titleText);
 
-  if (movie.im_r) {
+  if (movie.lb_r) {
     const badge = document.createElement("span");
     badge.className = "movie-rating";
-    badge.textContent = `★ ${movie.im_r}`;
+    badge.textContent = `★ ${movie.lb_r}`;
     titleDiv.appendChild(badge);
   }
 
@@ -588,7 +588,7 @@ function sortWatchlistEntries() {
   items.sort((a, b) => {
     if (activeSort === "alpha") return dir * a.dataset.title.localeCompare(b.dataset.title, "fr");
     if (activeSort === "year")  return dir * ((parseInt(a.dataset.year, 10) || 0) - (parseInt(b.dataset.year, 10) || 0));
-    if (activeSort === "imdb")  return dir * ((parseFloat(a.dataset.imdb) || 0) - (parseFloat(b.dataset.imdb) || 0));
+    if (activeSort === "letterboxd") return dir * ((parseFloat(a.dataset.rating) || 0) - (parseFloat(b.dataset.rating) || 0));
     return 0;
   });
   for (const item of items) watchlistEl.appendChild(item);
@@ -604,8 +604,8 @@ function sortMovieList() {
     if (activeSort === "year") {
       return dir * ((parseInt(a.dataset.year, 10) || 0) - (parseInt(b.dataset.year, 10) || 0));
     }
-    if (activeSort === "imdb") {
-      return dir * ((parseFloat(a.dataset.imdb) || 0) - (parseFloat(b.dataset.imdb) || 0));
+    if (activeSort === "letterboxd") {
+      return dir * ((parseFloat(a.dataset.rating) || 0) - (parseFloat(b.dataset.rating) || 0));
     }
     return 0;
   });
@@ -771,14 +771,14 @@ function openMovieFromRail(movieId) {
 function renderRailFeature(movies) {
   const block = document.getElementById("rail-feature-block");
   const el = document.getElementById("rail-feature");
-  const rated = movies.filter((m) => m.im_r);
+  const rated = movies.filter((m) => m.lb_r);
   if (rated.length === 0) {
     block.style.display = "none";
     return;
   }
   const top3 = rated
     .slice()
-    .sort((a, b) => parseFloat(b.im_r) - parseFloat(a.im_r))
+    .sort((a, b) => parseFloat(b.lb_r) - parseFloat(a.lb_r))
     .slice(0, 3);
   el.innerHTML = "";
   for (const m of top3) {
@@ -796,7 +796,7 @@ function renderRailFeature(movies) {
     body.appendChild(title);
     const meta = document.createElement("div");
     meta.className = "rail-feat-meta";
-    meta.textContent = [`★ ${m.im_r}`, m.di].filter(Boolean).join(" · ");
+    meta.textContent = [`★ ${m.lb_r}`, m.di].filter(Boolean).join(" · ");
     body.appendChild(meta);
     item.appendChild(body);
     item.onclick = () => openMovieFromRail(m.id);
