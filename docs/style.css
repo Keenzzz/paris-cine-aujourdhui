@@ -681,6 +681,35 @@ header {
   margin-top: 4px;
 }
 
+.movie-genres {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 7px;
+}
+
+.genre-tag {
+  all: unset;
+  cursor: pointer;
+  font-size: 10.5px;
+  color: #7bcabb;
+  border: 1px solid #223b36;
+  border-radius: 20px;
+  padding: 2px 9px;
+  transition: color 0.15s, border-color 0.15s, background 0.15s;
+}
+
+.genre-tag:hover {
+  color: #f3ede0;
+  border-color: #4f8f80;
+  background: rgba(79, 143, 128, 0.12);
+}
+
+.genre-tag:focus-visible {
+  outline: 2px solid #4f8f80;
+  outline-offset: 2px;
+}
+
 .movie-rating {
   display: inline-block;
   padding: 1px 6px;
@@ -1170,7 +1199,8 @@ footer a {
 #movie-list.grid-view .movie-original-title,
 #watchlist-list.grid-view .watchlist-original,
 #movie-list.grid-view .day-tabs,
-#watchlist-list.grid-view .day-tabs {
+#watchlist-list.grid-view .day-tabs,
+#movie-list.grid-view .movie-genres {
   display: none;
 }
 

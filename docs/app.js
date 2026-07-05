@@ -155,11 +155,6 @@ function todayISO() {
   return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
 }
 
-function genreLabels(geString) {
-  if (!geString) return "";
-  return geString.split(",").map((g) => GENRES[g] || g).join(", ");
-}
-
 async function getMoviesForToday(date) {
   const cached = await storage.get(CACHE_KEY);
   const entry = cached[CACHE_KEY];
@@ -513,6 +508,7 @@ function buildMovieRow(movie) {
   li.dataset.movieId = String(movie.id);
   li.dataset.title = movie.ti || "";
   li.dataset.rating = movie.lb_r ? String(movie.lb_r) : "0";
+  li.dataset.genres = movie.ge || "";
   li._showtimes = null;
 
   const img = createPosterImg(`${API_BASE}/get_poster.php?id=${movie.id}`, "poster");
@@ -558,8 +554,28 @@ function buildMovieRow(movie) {
 
   const meta = document.createElement("div");
   meta.className = "movie-meta";
-  meta.textContent = [movie.di, genreLabels(movie.ge), movie.du, movie.ye].filter(Boolean).join(" · ");
+  meta.textContent = [movie.di, movie.du, movie.ye].filter(Boolean).join(" · ");
   info.appendChild(meta);
+
+  if (movie.ge) {
+    const genresDiv = document.createElement("div");
+    genresDiv.className = "movie-genres";
+    for (const code of movie.ge.split(",")) {
+      const label = GENRES[code] || code;
+      const tag = document.createElement("button");
+      tag.type = "button";
+      tag.className = "genre-tag";
+      tag.textContent = `#${label}`;
+      tag.addEventListener("click", (e) => {
+        e.stopPropagation();
+        searchEl.value = label;
+        searchEl.dispatchEvent(new Event("input", { bubbles: true }));
+        searchEl.focus();
+      });
+      genresDiv.appendChild(tag);
+    }
+    info.appendChild(genresDiv);
+  }
   main.appendChild(info);
 
   const panel = document.createElement("div");
@@ -633,7 +649,8 @@ async function applyFilters() {
     if (li.classList.contains("hidden")) continue;
     const inTitle = li.dataset.title.toLowerCase().includes(q);
     const inMeta  = li.querySelector(".movie-meta")?.textContent.toLowerCase().includes(q) ?? false;
-    if (!inTitle && !inMeta) {
+    const inGenre = (li.dataset.genres || "").split(",").some((code) => (GENRES[code] || code).toLowerCase().includes(q));
+    if (!inTitle && !inMeta && !inGenre) {
       li.classList.add("hidden");
       toCheckCinema.push(li);
     }
