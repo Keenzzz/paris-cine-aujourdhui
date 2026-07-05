@@ -241,6 +241,10 @@ a { color: inherit; }
   box-shadow: 0 0 0 1px #15130f;
 }
 
+.cine-pin-indep span {
+  box-shadow: 0 0 0 2px #4f8f80, 0 0 0 3px #15130f;
+}
+
 .cine-cluster span {
   display: flex;
   align-items: center;
@@ -254,6 +258,30 @@ a { color: inherit; }
   font-size: 12px;
   font-family: "Segoe UI", -apple-system, system-ui, Roboto, Arial, sans-serif;
   box-shadow: 0 0 0 4px rgba(224, 169, 68, 0.3), 0 0 0 1px #15130f;
+}
+
+#map-legend {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 10.5px;
+  color: #9a917c;
+}
+
+.map-legend-dot {
+  flex-shrink: 0;
+  width: 11px;
+  height: 11px;
+  border-radius: 50%;
+  background: #e0a944;
+  box-shadow: 0 0 0 2px #4f8f80;
+}
+
+#map-hint {
+  color: #7f7663;
+  font-size: 11px;
+  font-style: italic;
+  margin: 0;
 }
 
 #map-panel {

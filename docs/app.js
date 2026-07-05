@@ -964,9 +964,16 @@ function initCineMap() {
   cineMap.addLayer(cineClusterGroup);
 }
 
-function cinePinIcon(count) {
+const CHAIN_PREFIXES = ["UGC", "Pathé", "MK2", "CGR"];
+
+function isChainCinema(name) {
+  return CHAIN_PREFIXES.some((p) => name.startsWith(p));
+}
+
+function cinePinIcon(count, name) {
+  const indep = !isChainCinema(name);
   return L.divIcon({
-    className: "cine-pin",
+    className: "cine-pin" + (indep ? " cine-pin-indep" : ""),
     html: `<span>${count}</span>`,
     iconSize: [22, 22],
     iconAnchor: [11, 11],
@@ -1007,12 +1014,12 @@ function updateCineMapMarkers() {
     }
     let marker = cineMarkers.get(name);
     if (!marker) {
-      marker = L.marker([coords.lat, coords.lon], { icon: cinePinIcon(count) });
+      marker = L.marker([coords.lat, coords.lon], { icon: cinePinIcon(count, name) });
       marker.on("click", () => { selectedCinema = name; renderCinemaPanel(name); });
       cineMarkers.set(name, marker);
       cineClusterGroup.addLayer(marker);
     } else {
-      marker.setIcon(cinePinIcon(count));
+      marker.setIcon(cinePinIcon(count, name));
     }
     marker.bindTooltip(name);
   }
