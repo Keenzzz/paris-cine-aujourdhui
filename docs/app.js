@@ -103,6 +103,7 @@ let showtimeFiltersEl, sortBarEl, footerSourceEl, mapPanelEl, mapRailEl, layoutE
 const CINEMAS_URL = "cinemas.json";
 let cinemaCoords  = {};
 let cineMap       = null;
+let cineClusterGroup = null;
 let cineMarkers   = new Map();
 let selectedCinema = null;
 
@@ -949,6 +950,18 @@ function initCineMap() {
     subdomains: "abcd",
     maxZoom: 20,
   }).addTo(cineMap);
+
+  cineClusterGroup = L.markerClusterGroup({
+    showCoverageOnHover: false,
+    maxClusterRadius: 60,
+    iconCreateFunction: (cluster) => L.divIcon({
+      className: "cine-cluster",
+      html: `<span>${cluster.getChildCount()}</span>`,
+      iconSize: [34, 34],
+      iconAnchor: [17, 17],
+    }),
+  });
+  cineMap.addLayer(cineClusterGroup);
 }
 
 function cinePinIcon(count) {
@@ -981,7 +994,7 @@ function buildCinemaAggregation() {
 }
 
 function updateCineMapMarkers() {
-  if (!cineMap) return;
+  if (!cineMap || !cineClusterGroup) return;
   const byCinema = buildCinemaAggregation();
 
   for (const [name, coords] of Object.entries(cinemaCoords)) {
@@ -989,14 +1002,15 @@ function updateCineMapMarkers() {
     const count = entry ? entry.today : 0;
     if (count === 0) {
       const existing = cineMarkers.get(name);
-      if (existing) { cineMap.removeLayer(existing); cineMarkers.delete(name); }
+      if (existing) { cineClusterGroup.removeLayer(existing); cineMarkers.delete(name); }
       continue;
     }
     let marker = cineMarkers.get(name);
     if (!marker) {
-      marker = L.marker([coords.lat, coords.lon], { icon: cinePinIcon(count) }).addTo(cineMap);
+      marker = L.marker([coords.lat, coords.lon], { icon: cinePinIcon(count) });
       marker.on("click", () => { selectedCinema = name; renderCinemaPanel(name); });
       cineMarkers.set(name, marker);
+      cineClusterGroup.addLayer(marker);
     } else {
       marker.setIcon(cinePinIcon(count));
     }

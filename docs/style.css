@@ -241,6 +241,21 @@ a { color: inherit; }
   box-shadow: 0 0 0 1px #15130f;
 }
 
+.cine-cluster span {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: #e0a944;
+  color: #1b1610;
+  font-weight: 700;
+  font-size: 12px;
+  font-family: "Segoe UI", -apple-system, system-ui, Roboto, Arial, sans-serif;
+  box-shadow: 0 0 0 4px rgba(224, 169, 68, 0.3), 0 0 0 1px #15130f;
+}
+
 #map-panel {
   flex: 1;
   min-height: 0;
