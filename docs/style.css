@@ -914,6 +914,20 @@ header {
   font-style: italic;
 }
 
+#no-results {
+  display: none;
+  padding: 40px 28px;
+  text-align: center;
+  color: #695f4c;
+  font-size: 12px;
+  font-style: italic;
+  margin: 0;
+}
+
+#no-results.visible {
+  display: block;
+}
+
 .villette-date {
   padding: 8px 28px 6px;
   font-size: 10px;

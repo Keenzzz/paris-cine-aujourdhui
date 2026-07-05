@@ -304,6 +304,11 @@ function updateCount() {
   const cinemaCount = countVisibleCinemas();
   const cinemaPart = cinemaCount > 0 ? ` · dans ${cinemaCount} cinéma${cinemaCount !== 1 ? "s" : ""}` : "";
   countLabelEl.textContent = `${visible} film${visible !== 1 ? "s" : ""} aujourd'hui${cinemaPart}`;
+
+  const noResultsEl = document.getElementById("no-results");
+  if (noResultsEl) {
+    noResultsEl.classList.toggle("visible", visible === 0 && searchEl.value.trim() !== "");
+  }
 }
 
 function removeEmptyMovieRow(li) {
