@@ -306,6 +306,14 @@ function updateCount() {
   countLabelEl.textContent = `${visible} film${visible !== 1 ? "s" : ""} aujourd'hui${cinemaPart}`;
 }
 
+function removeEmptyMovieRow(li) {
+  moviesToday = moviesToday.filter((m) => String(m.id) !== li.dataset.movieId);
+  li.remove();
+  const statCountEl = document.getElementById("stat-count");
+  if (statCountEl) statCountEl.textContent = String(moviesToday.length);
+  updateCount();
+}
+
 function buildShowtimeRow(s) {
   const time = s.start.slice(11, 16);
   const row = document.createElement("li");
@@ -1164,6 +1172,10 @@ async function init() {
   movieListEl.appendChild(fragment);
   await cinemasPromise;
   mapWithConcurrency(rows, 6, (li) => li._loadShowtimes().then(() => {
+    if (li._showtimes && li._showtimes.length === 0) {
+      removeEmptyMovieRow(li);
+      return;
+    }
     if (activeTab !== "villette" && activeTab !== "watchlist") updateCount();
     updateCineMapMarkers();
   }));
