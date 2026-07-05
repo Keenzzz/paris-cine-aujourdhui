@@ -98,7 +98,7 @@ let moviesToday   = [];
 let _searchToken  = 0;
 
 let movieListEl, villetteListEl, watchlistEl, countLabelEl, searchEl;
-let showtimeFiltersEl, sortBarEl, footerSourceEl, mapPanelEl, mapRailEl, layoutEl;
+let showtimeFiltersEl, sortBarEl, footerSourceEl, mapPanelEl, mapRailEl, layoutEl, watchlistHintEl;
 
 const CINEMAS_URL = "cinemas.json";
 let cinemaCoords  = {};
@@ -393,10 +393,12 @@ async function toggleBookmark(movie, btn) {
   if (idx >= 0) {
     watchlist.splice(idx, 1);
     btn.textContent = "♡";
+    btn.title = "Ajouter à Ma liste";
     btn.classList.remove("bookmarked");
   } else {
     watchlist.push({ id: movie.id, ti: movie.ti, o_ti: movie.o_ti || "", di: movie.di || "", ye: movie.ye || "", im_r: movie.im_r || "", savedAt: currentDate });
     btn.textContent = "♥";
+    btn.title = "Retirer de Ma liste";
     btn.classList.add("bookmarked");
   }
   await storage.set({ [WATCHLIST_KEY]: watchlist });
@@ -458,7 +460,7 @@ function renderWatchlist() {
       watchlist = watchlist.filter((x) => x.id !== m.id);
       await storage.set({ [WATCHLIST_KEY]: watchlist });
       const bookmarkBtn = movieListEl.querySelector(`[data-bookmark-id="${m.id}"]`);
-      if (bookmarkBtn) { bookmarkBtn.textContent = "♡"; bookmarkBtn.classList.remove("bookmarked"); }
+      if (bookmarkBtn) { bookmarkBtn.textContent = "♡"; bookmarkBtn.title = "Ajouter à Ma liste"; bookmarkBtn.classList.remove("bookmarked"); }
       updateWatchlistTab();
       renderRailWatchlistToday(moviesToday);
       renderWatchlist();
@@ -533,6 +535,7 @@ function buildMovieRow(movie) {
   const bookmarkBtn = document.createElement("button");
   bookmarkBtn.className = "bookmark-btn" + (isBookmarked(movie.id) ? " bookmarked" : "");
   bookmarkBtn.textContent = isBookmarked(movie.id) ? "♥" : "♡";
+  bookmarkBtn.title = isBookmarked(movie.id) ? "Retirer de Ma liste" : "Ajouter à Ma liste";
   bookmarkBtn.dataset.bookmarkId = String(movie.id);
   bookmarkBtn.addEventListener("click", (e) => {
     e.stopPropagation();
@@ -892,6 +895,7 @@ function switchToMovieTab() {
   showOnlyList(movieListEl);
   showtimeFiltersEl.style.display = "";
   sortBarEl.style.display = "";
+  watchlistHintEl.style.display = "none";
   footerSourceEl.innerHTML = 'données non officielles <a href="https://www.paris-cine.info" target="_blank" rel="noopener">paris-cine.info</a>';
   applyFilters();
 }
@@ -900,6 +904,7 @@ function switchToVilletteTab() {
   showOnlyList(villetteListEl);
   showtimeFiltersEl.style.display = "none";
   sortBarEl.style.display = "none";
+  watchlistHintEl.style.display = "none";
   footerSourceEl.innerHTML = '<a href="https://www.lavillette.com/manifestations/cinema-en-plein-air-26/" target="_blank" rel="noopener">lavillette.com</a>';
   renderVilletteList();
 }
@@ -908,6 +913,7 @@ function switchToWatchlistTab() {
   showOnlyList(watchlistEl);
   showtimeFiltersEl.style.display = "none";
   sortBarEl.style.display = "";
+  watchlistHintEl.style.display = "block";
   footerSourceEl.innerHTML = 'données non officielles <a href="https://www.paris-cine.info" target="_blank" rel="noopener">paris-cine.info</a>';
   renderWatchlist();
 }
@@ -916,6 +922,7 @@ function switchToMapTab() {
   showOnlyList(null);
   showtimeFiltersEl.style.display = "";
   sortBarEl.style.display = "none";
+  watchlistHintEl.style.display = "none";
   syncMapPlacement();
 }
 
@@ -1128,6 +1135,7 @@ async function init() {
   countLabelEl      = document.getElementById("count-label");
   searchEl          = document.getElementById("search");
   showtimeFiltersEl = document.getElementById("showtime-filters");
+  watchlistHintEl   = document.getElementById("watchlist-hint");
   sortBarEl         = document.getElementById("sort-bar");
   footerSourceEl    = document.getElementById("footer-source");
   backToTopBtn      = document.getElementById("back-to-top");
