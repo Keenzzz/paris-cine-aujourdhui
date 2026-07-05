@@ -951,6 +951,16 @@ function initCineMap() {
     maxZoom: 20,
   }).addTo(cineMap);
 
+  fetch("arrondissements.geojson")
+    .then((res) => res.json())
+    .then((geojson) => {
+      L.geoJSON(geojson, {
+        style: { color: "#4f8f80", weight: 1.2, opacity: 0.55, fill: false },
+        interactive: false,
+      }).addTo(cineMap);
+    })
+    .catch(() => {});
+
   cineClusterGroup = L.markerClusterGroup({
     showCoverageOnHover: false,
     maxClusterRadius: 60,
