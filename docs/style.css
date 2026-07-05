@@ -23,7 +23,7 @@ a { color: inherit; }
   min-height: 100vh;
 }
 
-.tab-map-only {
+.tab-mobile-only {
   display: none;
 }
 
@@ -301,10 +301,17 @@ a { color: inherit; }
 }
 
 .marathon-film {
+  display: block;
   font-family: Georgia, "Iowan Old Style", serif;
   font-weight: 700;
   font-size: 12.5px;
   color: #f6efe1;
+  text-decoration: none;
+}
+
+.marathon-film:hover {
+  color: #7bcabb;
+  text-decoration: underline;
 }
 
 .marathon-meta {
@@ -1281,6 +1288,10 @@ footer a {
     padding-right: 18px;
   }
 
+  #main > #marathon-block {
+    padding: 14px 18px;
+  }
+
   .movie-main,
   .watchlist-main {
     flex-direction: column;
@@ -1305,7 +1316,7 @@ footer a {
     display: flex;
   }
 
-  .tab-map-only {
+  .tab-mobile-only {
     display: inline-block;
   }
 }

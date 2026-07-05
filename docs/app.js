@@ -921,6 +921,7 @@ function switchToMovieTab() {
   watchlistHintEl.style.display = "none";
   footerSourceEl.innerHTML = 'données non officielles <a href="https://www.paris-cine.info" target="_blank" rel="noopener">paris-cine.info</a>';
   applyFilters();
+  syncMobileTabPlacement();
 }
 
 function switchToVilletteTab() {
@@ -930,6 +931,7 @@ function switchToVilletteTab() {
   watchlistHintEl.style.display = "none";
   footerSourceEl.innerHTML = '<a href="https://www.lavillette.com/manifestations/cinema-en-plein-air-26/" target="_blank" rel="noopener">lavillette.com</a>';
   renderVilletteList();
+  syncMobileTabPlacement();
 }
 
 function switchToWatchlistTab() {
@@ -939,6 +941,7 @@ function switchToWatchlistTab() {
   watchlistHintEl.style.display = "block";
   footerSourceEl.innerHTML = 'données non officielles <a href="https://www.paris-cine.info" target="_blank" rel="noopener">paris-cine.info</a>';
   renderWatchlist();
+  syncMobileTabPlacement();
 }
 
 function switchToMapTab() {
@@ -946,7 +949,20 @@ function switchToMapTab() {
   showtimeFiltersEl.style.display = "";
   sortBarEl.style.display = "none";
   watchlistHintEl.style.display = "none";
+  syncMobileTabPlacement();
+}
+
+function switchToMarathonTab() {
+  showOnlyList(null);
+  showtimeFiltersEl.style.display = "none";
+  sortBarEl.style.display = "none";
+  watchlistHintEl.style.display = "none";
+  syncMobileTabPlacement();
+}
+
+function syncMobileTabPlacement() {
   syncMapPlacement();
+  syncMarathonPlacement();
 }
 
 function syncMapPlacement() {
@@ -963,6 +979,22 @@ function syncMapPlacement() {
   } else if (mapRailEl.parentElement !== layoutEl) {
     layoutEl.appendChild(mapRailEl);
     if (cineMap) setTimeout(() => cineMap.invalidateSize(), 50);
+  }
+}
+
+function syncMarathonPlacement() {
+  const marathonBlockEl = document.getElementById("marathon-block");
+  if (!marathonBlockEl || !mapRailEl || !mapPanelEl) return;
+  const isMobile = window.matchMedia("(max-width: 760px)").matches;
+  const showOnMobile = isMobile && activeTab === "marathon";
+  marathonBlockEl.classList.toggle("tab-active", showOnMobile);
+
+  if (showOnMobile) {
+    if (marathonBlockEl.nextElementSibling !== movieListEl) {
+      movieListEl.parentElement.insertBefore(marathonBlockEl, movieListEl);
+    }
+  } else if (marathonBlockEl.parentElement !== mapRailEl) {
+    mapRailEl.insertBefore(marathonBlockEl, mapPanelEl);
   }
 }
 
@@ -1124,7 +1156,7 @@ function computeMarathonCombos() {
       const [hh, mm] = s.start.slice(11, 16).split(":").map(Number);
       const startMin = hh * 60 + mm;
       if (startMin < nowMin) continue;
-      sessions.push({ cinema: s.title, movieTitle: li.dataset.title, time: s.start.slice(11, 16), startMin, endMin: startMin + durationMin });
+      sessions.push({ cinema: s.title, movieTitle: li.dataset.title, time: s.start.slice(11, 16), book: s.book, startMin, endMin: startMin + durationMin });
     }
   }
 
@@ -1177,8 +1209,11 @@ function renderMarathonBlock() {
   function buildLeg(leg) {
     const div = document.createElement("div");
     div.className = "marathon-leg";
-    const film = document.createElement("div");
+    const film = document.createElement("a");
     film.className = "marathon-film";
+    film.href = leg.book || API_BASE;
+    film.target = "_blank";
+    film.rel = "noopener noreferrer";
     film.textContent = leg.movieTitle;
     const meta = document.createElement("div");
     meta.className = "marathon-meta";
@@ -1351,12 +1386,13 @@ async function init() {
       if (activeTab === "villette") switchToVilletteTab();
       else if (activeTab === "watchlist") switchToWatchlistTab();
       else if (activeTab === "map") switchToMapTab();
+      else if (activeTab === "marathon") switchToMarathonTab();
       else switchToMovieTab();
       updateCineMapMarkers();
     });
   }
 
-  window.matchMedia("(max-width: 760px)").addEventListener("change", syncMapPlacement);
+  window.matchMedia("(max-width: 760px)").addEventListener("change", syncMobileTabPlacement);
 
   initDropdown(document.getElementById("time-filter-dd"), (value) => {
     activeWindow = value;
