@@ -98,7 +98,13 @@ let moviesToday   = [];
 let _searchToken  = 0;
 
 let movieListEl, villetteListEl, watchlistEl, countLabelEl, searchEl;
-let showtimeFiltersEl, sortBarEl, footerSourceEl;
+let showtimeFiltersEl, sortBarEl, footerSourceEl, mapPanelEl;
+
+const CINEMAS_URL = "cinemas.json";
+let cinemaCoords  = {};
+let cineMap       = null;
+let cineMarkers   = new Map();
+let selectedCinema = null;
 
 function initDropdown(rootEl, onSelect) {
   const trigger = rootEl.querySelector(".dd-trigger");
@@ -897,6 +903,157 @@ function switchToWatchlistTab() {
   renderWatchlist();
 }
 
+// ── Carte des cinémas ───────────────────────────────────────────────────────
+
+async function loadCinemaCoords() {
+  try {
+    const res = await fetch(CINEMAS_URL);
+    if (!res.ok) throw new Error(`cinemas.json a répondu ${res.status}`);
+    cinemaCoords = await res.json();
+  } catch {
+    cinemaCoords = {};
+  }
+}
+
+function initCineMap() {
+  if (cineMap || typeof L === "undefined") return;
+  const mapEl = document.getElementById("cine-map");
+  if (!mapEl) return;
+  cineMap = L.map(mapEl, { scrollWheelZoom: false }).setView([48.8566, 2.3522], 12);
+  L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+    attribution: "© OpenStreetMap contributors",
+    maxZoom: 19,
+  }).addTo(cineMap);
+}
+
+function buildCinemaAggregation() {
+  const byCinema = new Map();
+  for (const li of movieListEl.children) {
+    if (!li._showtimes) continue;
+    const movieTitle = li.dataset.title;
+    for (const s of li._showtimes) {
+      if (!s.title || !s.start) continue;
+      if (!byCinema.has(s.title)) byCinema.set(s.title, { today: 0, byDate: {} });
+      const entry = byCinema.get(s.title);
+      const date = s.start.slice(0, 10);
+      if (date === currentDate) entry.today++;
+      if (!entry.byDate[date]) entry.byDate[date] = [];
+      entry.byDate[date].push({ time: s.start.slice(11, 16), movieTitle, type: s.type, book: s.book });
+    }
+  }
+  return byCinema;
+}
+
+function markerColor(ratio) {
+  const lo = [0x4f, 0x8f, 0x80];
+  const hi = [0xe0, 0xa9, 0x44];
+  const mix = lo.map((c, i) => Math.round(c + (hi[i] - c) * ratio));
+  return `rgb(${mix.join(",")})`;
+}
+
+function updateCineMapMarkers() {
+  if (!cineMap) return;
+  const byCinema = buildCinemaAggregation();
+  const maxToday = Math.max(1, ...Array.from(byCinema.values()).map((e) => e.today));
+
+  for (const [name, coords] of Object.entries(cinemaCoords)) {
+    const entry = byCinema.get(name);
+    const count = entry ? entry.today : 0;
+    if (count === 0) {
+      const existing = cineMarkers.get(name);
+      if (existing) { cineMap.removeLayer(existing); cineMarkers.delete(name); }
+      continue;
+    }
+    const radius = Math.min(20, 5 + Math.sqrt(count) * 3.2);
+    const color = markerColor(count / maxToday);
+    let marker = cineMarkers.get(name);
+    if (!marker) {
+      marker = L.circleMarker([coords.lat, coords.lon], {
+        radius, color: "#15130f", weight: 1, fillColor: color, fillOpacity: 0.85,
+      }).addTo(cineMap);
+      marker.on("click", () => { selectedCinema = name; renderCinemaPanel(name); });
+      cineMarkers.set(name, marker);
+    } else {
+      marker.setStyle({ radius, fillColor: color });
+    }
+    marker.bindTooltip(`${name} · ${count} séance${count !== 1 ? "s" : ""} aujourd'hui`);
+  }
+
+  if (selectedCinema) renderCinemaPanel(selectedCinema);
+}
+
+function formatPanelDate(date) {
+  if (date === currentDate) return "Aujourd'hui";
+  const d = new Date(date + "T12:00:00");
+  const tom = new Date(); tom.setDate(tom.getDate() + 1);
+  if (date === tom.toISOString().slice(0, 10)) return "Demain";
+  return d.toLocaleDateString("fr-FR", { weekday: "short", day: "numeric", month: "short" });
+}
+
+function renderCinemaPanel(name) {
+  const byCinema = buildCinemaAggregation();
+  const entry = byCinema.get(name);
+  mapPanelEl.innerHTML = "";
+
+  const title = document.createElement("p");
+  title.className = "map-panel-title";
+  title.textContent = name;
+  mapPanelEl.appendChild(title);
+
+  if (!entry || Object.keys(entry.byDate).length === 0) {
+    const empty = document.createElement("p");
+    empty.className = "map-panel-empty";
+    empty.textContent = "Pas de séance trouvée pour ce cinéma.";
+    mapPanelEl.appendChild(empty);
+    return;
+  }
+
+  const dates = Object.keys(entry.byDate).sort();
+  const defaultDate = dates.includes(currentDate) ? currentDate : dates[0];
+
+  const tabsDiv = document.createElement("div");
+  tabsDiv.className = "day-tabs";
+  const listEl = document.createElement("ul");
+  listEl.className = "showtimes";
+
+  function renderList(date) {
+    listEl.innerHTML = "";
+    const items = entry.byDate[date].slice().sort((a, b) => a.time.localeCompare(b.time));
+    for (const it of items) {
+      const li = document.createElement("li");
+      const link = document.createElement("a");
+      link.href = it.book || API_BASE;
+      link.target = "_blank";
+      link.rel = "noopener noreferrer";
+      link.textContent = `${it.time} — ${it.movieTitle}`;
+      li.appendChild(link);
+      if (it.type) {
+        const lang = document.createElement("span");
+        lang.className = "lang-badge";
+        lang.textContent = it.type;
+        li.appendChild(lang);
+      }
+      listEl.appendChild(li);
+    }
+  }
+
+  for (const date of dates) {
+    const btn = document.createElement("button");
+    btn.className = "day-tab" + (date === defaultDate ? " active" : "");
+    btn.textContent = formatPanelDate(date);
+    btn.addEventListener("click", () => {
+      tabsDiv.querySelector(".day-tab.active").classList.remove("active");
+      btn.classList.add("active");
+      renderList(date);
+    });
+    tabsDiv.appendChild(btn);
+  }
+
+  mapPanelEl.appendChild(tabsDiv);
+  mapPanelEl.appendChild(listEl);
+  renderList(defaultDate);
+}
+
 // ── Init ──────────────────────────────────────────────────────────────────────
 
 async function init() {
@@ -911,11 +1068,15 @@ async function init() {
   sortBarEl         = document.getElementById("sort-bar");
   footerSourceEl    = document.getElementById("footer-source");
   backToTopBtn      = document.getElementById("back-to-top");
+  mapPanelEl        = document.getElementById("map-panel");
 
   currentDate = todayISO();
   dateLabelEl.textContent = new Date().toLocaleDateString("fr-FR", {
     weekday: "long", day: "numeric", month: "long",
   });
+
+  const cinemasPromise = loadCinemaCoords();
+  initCineMap();
 
   const stored = await storage.get(WATCHLIST_KEY);
   watchlist = stored[WATCHLIST_KEY] || [];
@@ -944,8 +1105,10 @@ async function init() {
   const rows = movies.map(buildMovieRow);
   for (const row of rows) fragment.appendChild(row);
   movieListEl.appendChild(fragment);
+  await cinemasPromise;
   mapWithConcurrency(rows, 6, (li) => li._loadShowtimes().then(() => {
     if (activeTab !== "villette" && activeTab !== "watchlist") updateCount();
+    updateCineMapMarkers();
   }));
 
   searchEl.addEventListener("input", () => {

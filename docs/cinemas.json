@@ -1,0 +1,314 @@
+{
+  "7 Batignolles": {
+    "lat": 48.89236,
+    "lon": 2.31048
+  },
+  "CGR Paris Lilas": {
+    "lat": 48.87746,
+    "lon": 2.40946
+  },
+  "Chaplin Denfert": {
+    "lat": 48.83382,
+    "lon": 2.33093
+  },
+  "Chaplin Saint Lambert": {
+    "lat": 48.84307,
+    "lon": 2.29853
+  },
+  "Christine Cinema Club": {
+    "lat": 48.8545,
+    "lon": 2.34017
+  },
+  "Cinéma du Panthéon": {
+    "lat": 48.84746,
+    "lon": 2.34246
+  },
+  "Club de l'étoile": {
+    "lat": 48.87613,
+    "lon": 2.29535
+  },
+  "Ecoles Cinema Club": {
+    "lat": 48.84836,
+    "lon": 2.34898
+  },
+  "Elysées Lincoln": {
+    "lat": 48.87055,
+    "lon": 2.30322
+  },
+  "Escurial": {
+    "lat": 48.83677,
+    "lon": 2.34965
+  },
+  "Espace Saint-Michel": {
+    "lat": 48.85307,
+    "lon": 2.34429
+  },
+  "Filmothèque du Quartier Latin": {
+    "lat": 48.8495,
+    "lon": 2.34287
+  },
+  "Forum des images": {
+    "lat": 48.86241,
+    "lon": 2.34524
+  },
+  "Jeu de Paume": {
+    "lat": 48.86557,
+    "lon": 2.32122
+  },
+  "L'Archipel": {
+    "lat": 48.87048,
+    "lon": 2.3546
+  },
+  "L'Arlequin": {
+    "lat": 48.85119,
+    "lon": 2.3304
+  },
+  "L'Entrepôt": {
+    "lat": 48.83395,
+    "lon": 2.31658
+  },
+  "L'Épée de Bois": {
+    "lat": 48.84127,
+    "lon": 2.34955
+  },
+  "La Cinémathèque française": {
+    "lat": 48.83683,
+    "lon": 2.38238
+  },
+  "La Géode": {
+    "lat": 48.89457,
+    "lon": 2.38866
+  },
+  "Le Balzac": {
+    "lat": 48.87288,
+    "lon": 2.29972
+  },
+  "Le Brady": {
+    "lat": 48.87177,
+    "lon": 2.35531
+  },
+  "Le Champo": {
+    "lat": 48.84997,
+    "lon": 2.34315
+  },
+  "Le CiNey": {
+    "lat": 48.89809,
+    "lon": 2.34068
+  },
+  "Le Cinéma des Cinéastes": {
+    "lat": 48.8843,
+    "lon": 2.32683
+  },
+  "Le Grand Action": {
+    "lat": 48.84752,
+    "lon": 2.35213
+  },
+  "Le Grand Rex": {
+    "lat": 48.87053,
+    "lon": 2.34765
+  },
+  "Le Louxor": {
+    "lat": 48.8835,
+    "lon": 2.35005
+  },
+  "Le Saint Germain des Prés": {
+    "lat": 48.85465,
+    "lon": 2.33335
+  },
+  "Les 3 Luxembourg": {
+    "lat": 48.8484,
+    "lon": 2.34085
+  },
+  "Les 5 Caumartin": {
+    "lat": 48.87556,
+    "lon": 2.32796
+  },
+  "Les 7 Parnassiens": {
+    "lat": 48.84195,
+    "lon": 2.32752
+  },
+  "Lucernaire": {
+    "lat": 48.84431,
+    "lon": 2.33044
+  },
+  "Luminor Hôtel de Ville": {
+    "lat": 48.85866,
+    "lon": 2.35361
+  },
+  "MK2 Bastille (Beaumarchais)": {
+    "lat": 48.85463,
+    "lon": 2.36909
+  },
+  "MK2 Bastille (Fg St Antoine)": {
+    "lat": 48.85316,
+    "lon": 2.37076
+  },
+  "MK2 Beaubourg": {
+    "lat": 48.86157,
+    "lon": 2.35241
+  },
+  "MK2 Bibliothèque": {
+    "lat": 48.83245,
+    "lon": 2.37548
+  },
+  "MK2 Gambetta": {
+    "lat": 48.86463,
+    "lon": 2.39954
+  },
+  "MK2 Nation": {
+    "lat": 48.84824,
+    "lon": 2.39314
+  },
+  "MK2 Odéon (St Germain)": {
+    "lat": 48.85242,
+    "lon": 2.33826
+  },
+  "MK2 Odéon (St Michel)": {
+    "lat": 48.85212,
+    "lon": 2.34277
+  },
+  "MK2 Parnasse": {
+    "lat": 48.84284,
+    "lon": 2.33062
+  },
+  "MK2 Quai de Loire": {
+    "lat": 48.88419,
+    "lon": 2.37218
+  },
+  "MK2 Quai de Seine": {
+    "lat": 48.88501,
+    "lon": 2.37146
+  },
+  "Mac-Mahon": {
+    "lat": 48.87555,
+    "lon": 2.29443
+  },
+  "Majestic Bastille": {
+    "lat": 48.85397,
+    "lon": 2.36996
+  },
+  "Majestic Passy": {
+    "lat": 48.85825,
+    "lon": 2.28232
+  },
+  "Max Linder Panorama": {
+    "lat": 48.87138,
+    "lon": 2.34481
+  },
+  "Nouvel Odéon": {
+    "lat": 48.85081,
+    "lon": 2.34178
+  },
+  "Pathé Alésia": {
+    "lat": 48.82812,
+    "lon": 2.32773
+  },
+  "Pathé Aquaboulevard": {
+    "lat": 48.83073,
+    "lon": 2.27618
+  },
+  "Pathé BNP Paribas": {
+    "lat": 48.87071,
+    "lon": 2.33447
+  },
+  "Pathé Beaugrenelle": {
+    "lat": 48.84917,
+    "lon": 2.28228
+  },
+  "Pathé Convention": {
+    "lat": 48.83779,
+    "lon": 2.29651
+  },
+  "Pathé La Villette": {
+    "lat": 48.89643,
+    "lon": 2.38898
+  },
+  "Pathé Les Fauvettes": {
+    "lat": 48.83354,
+    "lon": 2.35379
+  },
+  "Pathé Montparnos": {
+    "lat": 48.8421,
+    "lon": 2.32442
+  },
+  "Pathé Palace": {
+    "lat": 48.87134,
+    "lon": 2.33359
+  },
+  "Pathé Parnasse": {
+    "lat": 48.84307,
+    "lon": 2.32449
+  },
+  "Pathé Wepler": {
+    "lat": 48.88391,
+    "lon": 2.32801
+  },
+  "Publicis Cinémas": {
+    "lat": 48.8726,
+    "lon": 2.29731
+  },
+  "Reflet Medicis": {
+    "lat": 48.84975,
+    "lon": 2.34303
+  },
+  "Saint-André des Arts": {
+    "lat": 48.85337,
+    "lon": 2.34212
+  },
+  "Studio 28": {
+    "lat": 48.88614,
+    "lon": 2.33539
+  },
+  "Studio Galande": {
+    "lat": 48.85163,
+    "lon": 2.34711
+  },
+  "Studio des Ursulines": {
+    "lat": 48.84275,
+    "lon": 2.34206
+  },
+  "UGC Ciné Cité Bercy": {
+    "lat": 48.83218,
+    "lon": 2.38529
+  },
+  "UGC Ciné Cité Les Halles": {
+    "lat": 48.86216,
+    "lon": 2.34537
+  },
+  "UGC Ciné Cité Paris 19": {
+    "lat": 48.89901,
+    "lon": 2.3768
+  },
+  "UGC Danton": {
+    "lat": 48.85265,
+    "lon": 2.34205
+  },
+  "UGC Gobelins": {
+    "lat": 48.83299,
+    "lon": 2.35419
+  },
+  "UGC Lyon Bastille": {
+    "lat": 48.84753,
+    "lon": 2.37184
+  },
+  "UGC Maillot": {
+    "lat": 48.87472,
+    "lon": 2.289
+  },
+  "UGC Montparnasse": {
+    "lat": 48.8435,
+    "lon": 2.32565
+  },
+  "UGC Odéon": {
+    "lat": 48.85236,
+    "lon": 2.33987
+  },
+  "UGC Opéra": {
+    "lat": 48.87137,
+    "lon": 2.33531
+  },
+  "UGC Rotonde": {
+    "lat": 48.84245,
+    "lon": 2.32893
+  }
+}
