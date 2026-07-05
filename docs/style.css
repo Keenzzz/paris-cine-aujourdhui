@@ -242,7 +242,7 @@ a { color: inherit; }
 }
 
 .cine-pin-indep span {
-  box-shadow: 0 0 0 2px #4f8f80, 0 0 0 3px #15130f;
+  box-shadow: 0 0 0 2px #2d5c50, 0 0 0 3px #15130f;
 }
 
 .cine-cluster span {
@@ -274,7 +274,7 @@ a { color: inherit; }
   height: 11px;
   border-radius: 50%;
   background: #e0a944;
-  box-shadow: 0 0 0 2px #4f8f80;
+  box-shadow: 0 0 0 2px #2d5c50;
 }
 
 #map-hint {
