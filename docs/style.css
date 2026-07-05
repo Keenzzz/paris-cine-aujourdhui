@@ -288,6 +288,12 @@ a { color: inherit; }
 #marathon-content {
   display: flex;
   flex-direction: column;
+  gap: 10px;
+}
+
+.marathon-combo {
+  display: flex;
+  flex-direction: column;
   gap: 6px;
   border: 1px solid #2c2619;
   border-radius: 4px;

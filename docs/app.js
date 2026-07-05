@@ -1099,7 +1099,20 @@ const MARATHON_MAX_WALK_KM = 1.2;
 const MARATHON_MIN_GAP = 5;
 const MARATHON_MAX_GAP = 90;
 
-function computeMarathonCombo() {
+const MARATHON_TIME_WINDOWS = [
+  { min: 0, max: 719 },    // matin : avant 12h00
+  { min: 720, max: 1079 }, // après-midi : 12h00–17h59
+  { min: 1080, max: 1439 }, // soir : 18h00+
+];
+
+function marathonComboKey(combo) {
+  return `${combo.a.cinema}|${combo.a.time}|${combo.b.cinema}|${combo.b.time}`;
+}
+
+function computeMarathonCombos() {
+  const now = new Date();
+  const nowMin = now.getHours() * 60 + now.getMinutes();
+
   const sessions = [];
   for (const li of movieListEl.children) {
     if (!li._showtimes) continue;
@@ -1110,11 +1123,12 @@ function computeMarathonCombo() {
       if (!cinemaCoords[s.title]) continue;
       const [hh, mm] = s.start.slice(11, 16).split(":").map(Number);
       const startMin = hh * 60 + mm;
+      if (startMin < nowMin) continue;
       sessions.push({ cinema: s.title, movieTitle: li.dataset.title, time: s.start.slice(11, 16), startMin, endMin: startMin + durationMin });
     }
   }
 
-  let best = null;
+  const all = [];
   for (const a of sessions) {
     for (const b of sessions) {
       if (a.cinema === b.cinema) continue;
@@ -1126,18 +1140,34 @@ function computeMarathonCombo() {
       if (distKm > MARATHON_MAX_WALK_KM) continue;
       const walkMin = Math.max(1, Math.round((distKm / 5) * 60));
       if (gap < walkMin + MARATHON_MIN_GAP) continue;
-      if (!best || gap < best.gap) best = { a, b, walkMin, gap };
+      all.push({ a, b, walkMin, gap });
     }
   }
-  return best;
+  if (all.length === 0) return [];
+
+  all.sort((x, y) => x.gap - y.gap);
+
+  const picked = [];
+  const usedKeys = new Set();
+  for (const w of MARATHON_TIME_WINDOWS) {
+    const match = all.find((c) => c.a.startMin >= w.min && c.a.startMin <= w.max && !usedKeys.has(marathonComboKey(c)));
+    if (match) { picked.push(match); usedKeys.add(marathonComboKey(match)); }
+  }
+  for (const c of all) {
+    if (picked.length >= 3) break;
+    const key = marathonComboKey(c);
+    if (!usedKeys.has(key)) { picked.push(c); usedKeys.add(key); }
+  }
+
+  return picked.slice(0, 3).sort((x, y) => x.a.startMin - y.a.startMin);
 }
 
 function renderMarathonBlock() {
   const block = document.getElementById("marathon-block");
   const content = document.getElementById("marathon-content");
   if (!block || !content) return;
-  const combo = computeMarathonCombo();
-  if (!combo) {
+  const combos = computeMarathonCombos();
+  if (combos.length === 0) {
     block.style.display = "none";
     return;
   }
@@ -1158,12 +1188,17 @@ function renderMarathonBlock() {
     return div;
   }
 
-  content.appendChild(buildLeg(combo.a));
-  const walk = document.createElement("div");
-  walk.className = "marathon-walk";
-  walk.textContent = `${combo.walkMin} min à pied`;
-  content.appendChild(walk);
-  content.appendChild(buildLeg(combo.b));
+  for (const combo of combos) {
+    const card = document.createElement("div");
+    card.className = "marathon-combo";
+    card.appendChild(buildLeg(combo.a));
+    const walk = document.createElement("div");
+    walk.className = "marathon-walk";
+    walk.textContent = `${combo.walkMin} min à pied`;
+    card.appendChild(walk);
+    card.appendChild(buildLeg(combo.b));
+    content.appendChild(card);
+  }
 }
 
 function formatPanelDate(date) {
