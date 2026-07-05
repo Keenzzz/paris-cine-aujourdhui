@@ -509,6 +509,7 @@ function buildMovieRow(movie) {
   li.dataset.title = movie.ti || "";
   li.dataset.rating = movie.lb_r ? String(movie.lb_r) : "0";
   li.dataset.genres = movie.ge || "";
+  li.dataset.duration = movie.du || "";
   li._showtimes = null;
 
   const img = createPosterImg(`${API_BASE}/get_poster.php?id=${movie.id}`, "poster");
@@ -1074,6 +1075,97 @@ function updateCineMapMarkers() {
   if (selectedCinema) renderCinemaPanel(selectedCinema);
 }
 
+// ── Idée de marathon ────────────────────────────────────────────────────────
+
+function parseDurationMinutes(du) {
+  if (!du) return null;
+  const hMatch = du.match(/(\d+)\s*h/);
+  const remainder = hMatch ? du.slice(du.indexOf(hMatch[0]) + hMatch[0].length) : du;
+  const mMatch = remainder.match(/(\d+)/);
+  if (!hMatch && !mMatch) return null;
+  return (hMatch ? parseInt(hMatch[1], 10) : 0) * 60 + (mMatch ? parseInt(mMatch[1], 10) : 0);
+}
+
+function haversineKm(lat1, lon1, lat2, lon2) {
+  const R = 6371;
+  const dLat = (lat2 - lat1) * Math.PI / 180;
+  const dLon = (lon2 - lon1) * Math.PI / 180;
+  const a = Math.sin(dLat / 2) ** 2
+    + Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * Math.sin(dLon / 2) ** 2;
+  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+}
+
+const MARATHON_MAX_WALK_KM = 1.2;
+const MARATHON_MIN_GAP = 5;
+const MARATHON_MAX_GAP = 90;
+
+function computeMarathonCombo() {
+  const sessions = [];
+  for (const li of movieListEl.children) {
+    if (!li._showtimes) continue;
+    const durationMin = parseDurationMinutes(li.dataset.duration);
+    if (!durationMin) continue;
+    for (const s of li._showtimes) {
+      if (!s.start || !s.title || !s.start.startsWith(currentDate)) continue;
+      if (!cinemaCoords[s.title]) continue;
+      const [hh, mm] = s.start.slice(11, 16).split(":").map(Number);
+      const startMin = hh * 60 + mm;
+      sessions.push({ cinema: s.title, movieTitle: li.dataset.title, time: s.start.slice(11, 16), startMin, endMin: startMin + durationMin });
+    }
+  }
+
+  let best = null;
+  for (const a of sessions) {
+    for (const b of sessions) {
+      if (a.cinema === b.cinema) continue;
+      const gap = b.startMin - a.endMin;
+      if (gap < MARATHON_MIN_GAP || gap > MARATHON_MAX_GAP) continue;
+      const coordsA = cinemaCoords[a.cinema];
+      const coordsB = cinemaCoords[b.cinema];
+      const distKm = haversineKm(coordsA.lat, coordsA.lon, coordsB.lat, coordsB.lon);
+      if (distKm > MARATHON_MAX_WALK_KM) continue;
+      const walkMin = Math.max(1, Math.round((distKm / 5) * 60));
+      if (gap < walkMin + MARATHON_MIN_GAP) continue;
+      if (!best || gap < best.gap) best = { a, b, walkMin, gap };
+    }
+  }
+  return best;
+}
+
+function renderMarathonBlock() {
+  const block = document.getElementById("marathon-block");
+  const content = document.getElementById("marathon-content");
+  if (!block || !content) return;
+  const combo = computeMarathonCombo();
+  if (!combo) {
+    block.style.display = "none";
+    return;
+  }
+  block.style.display = "";
+  content.innerHTML = "";
+
+  function buildLeg(leg) {
+    const div = document.createElement("div");
+    div.className = "marathon-leg";
+    const film = document.createElement("div");
+    film.className = "marathon-film";
+    film.textContent = leg.movieTitle;
+    const meta = document.createElement("div");
+    meta.className = "marathon-meta";
+    meta.textContent = `${leg.cinema} · ${leg.time}`;
+    div.appendChild(film);
+    div.appendChild(meta);
+    return div;
+  }
+
+  content.appendChild(buildLeg(combo.a));
+  const walk = document.createElement("div");
+  walk.className = "marathon-walk";
+  walk.textContent = `${combo.walkMin} min à pied`;
+  content.appendChild(walk);
+  content.appendChild(buildLeg(combo.b));
+}
+
 function formatPanelDate(date) {
   if (date === currentDate) return "Aujourd'hui";
   const d = new Date(date + "T12:00:00");
@@ -1208,7 +1300,7 @@ async function init() {
     }
     if (activeTab !== "villette" && activeTab !== "watchlist") updateCount();
     updateCineMapMarkers();
-  }));
+  })).then(renderMarathonBlock);
 
   searchEl.addEventListener("input", () => {
     if (activeTab === "villette") renderVilletteList();
