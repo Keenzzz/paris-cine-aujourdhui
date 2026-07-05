@@ -98,7 +98,7 @@ let moviesToday   = [];
 let _searchToken  = 0;
 
 let movieListEl, villetteListEl, watchlistEl, countLabelEl, searchEl;
-let showtimeFiltersEl, sortBarEl, footerSourceEl, mapPanelEl;
+let showtimeFiltersEl, sortBarEl, footerSourceEl, mapPanelEl, mapRailEl, layoutEl;
 
 const CINEMAS_URL = "cinemas.json";
 let cinemaCoords  = {};
@@ -903,6 +903,30 @@ function switchToWatchlistTab() {
   renderWatchlist();
 }
 
+function switchToMapTab() {
+  showOnlyList(null);
+  showtimeFiltersEl.style.display = "";
+  sortBarEl.style.display = "none";
+  syncMapPlacement();
+}
+
+function syncMapPlacement() {
+  if (!mapRailEl) return;
+  const isMobile = window.matchMedia("(max-width: 760px)").matches;
+  const showOnMobile = isMobile && activeTab === "map";
+  mapRailEl.classList.toggle("tab-active", showOnMobile);
+
+  if (showOnMobile) {
+    if (mapRailEl.nextElementSibling !== movieListEl) {
+      movieListEl.parentElement.insertBefore(mapRailEl, movieListEl);
+    }
+    if (cineMap) setTimeout(() => cineMap.invalidateSize(), 50);
+  } else if (mapRailEl.parentElement !== layoutEl) {
+    layoutEl.appendChild(mapRailEl);
+    if (cineMap) setTimeout(() => cineMap.invalidateSize(), 50);
+  }
+}
+
 // ── Carte des cinémas ───────────────────────────────────────────────────────
 
 async function loadCinemaCoords() {
@@ -940,9 +964,11 @@ function buildCinemaAggregation() {
   const byCinema = new Map();
   for (const li of movieListEl.children) {
     if (!li._showtimes) continue;
+    if (activeTab === "cultes" && !(parseInt(li.dataset.year, 10) <= CULTES_CUTOFF)) continue;
     const movieTitle = li.dataset.title;
     for (const s of li._showtimes) {
       if (!s.title || !s.start) continue;
+      if (!showtimeMatchesFilters(s)) continue;
       if (!byCinema.has(s.title)) byCinema.set(s.title, { today: 0, byDate: {} });
       const entry = byCinema.get(s.title);
       const date = s.start.slice(0, 10);
@@ -1067,6 +1093,8 @@ async function init() {
   footerSourceEl    = document.getElementById("footer-source");
   backToTopBtn      = document.getElementById("back-to-top");
   mapPanelEl        = document.getElementById("map-panel");
+  mapRailEl         = document.getElementById("map-rail");
+  layoutEl          = document.getElementById("layout");
 
   currentDate = todayISO();
   dateLabelEl.textContent = new Date().toLocaleDateString("fr-FR", {
@@ -1122,18 +1150,24 @@ async function init() {
       activeTab = btn.dataset.tab;
       if (activeTab === "villette") switchToVilletteTab();
       else if (activeTab === "watchlist") switchToWatchlistTab();
+      else if (activeTab === "map") switchToMapTab();
       else switchToMovieTab();
+      updateCineMapMarkers();
     });
   }
+
+  window.matchMedia("(max-width: 760px)").addEventListener("change", syncMapPlacement);
 
   initDropdown(document.getElementById("time-filter-dd"), (value) => {
     activeWindow = value;
     applyShowtimeFilters();
+    updateCineMapMarkers();
   });
 
   initDropdown(document.getElementById("version-filter-dd"), (value) => {
     activeVersion = value;
     applyShowtimeFilters();
+    updateCineMapMarkers();
   });
 
   for (const btn of document.querySelectorAll(".sort-btn")) {

@@ -17,10 +17,14 @@ a { color: inherit; }
 
 #layout {
   display: grid;
-  grid-template-columns: 300px 1fr 380px;
-  max-width: 1520px;
+  grid-template-columns: 300px 1fr 460px;
+  max-width: 1640px;
   margin: 0 auto;
   min-height: 100vh;
+}
+
+.tab-map-only {
+  display: none;
 }
 
 /* ── Rail (colonne latérale) ──────────────────────────────────────────── */
@@ -216,7 +220,7 @@ a { color: inherit; }
 }
 
 #cine-map {
-  height: 260px;
+  height: 520px;
   border-radius: 6px;
   border: 1px solid #2c2619;
   background: #1c1811;
@@ -1159,10 +1163,19 @@ footer a {
   }
 
   #map-rail {
+    display: none;
     border-left: none;
     border-top: 1px solid rgba(243, 237, 224, 0.05);
     position: static;
     max-height: none;
     padding: 18px;
+  }
+
+  #map-rail.tab-active {
+    display: flex;
+  }
+
+  .tab-map-only {
+    display: inline-block;
   }
 }
