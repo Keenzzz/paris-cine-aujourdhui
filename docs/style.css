@@ -17,8 +17,8 @@ a { color: inherit; }
 
 #layout {
   display: grid;
-  grid-template-columns: 300px 1fr 460px;
-  max-width: 1640px;
+  grid-template-columns: 300px 1fr 560px;
+  max-width: 1740px;
   margin: 0 auto;
   min-height: 100vh;
 }
@@ -218,6 +218,7 @@ a { color: inherit; }
   position: sticky;
   top: 0;
   max-height: 100vh;
+  overflow-y: auto;
 }
 
 #map-controls {
