@@ -336,11 +336,10 @@ function buildShowtimeRow(s) {
     lang.textContent = s.type;
     row.appendChild(lang);
   }
-  const cardBadge = cinemaCardBadge(s.title);
-  if (cardBadge) {
+  for (const badge of cinemaCardBadges(s.title)) {
     const card = document.createElement("span");
     card.className = "card-badge";
-    card.textContent = cardBadge;
+    card.textContent = badge;
     row.appendChild(card);
   }
   return row;
@@ -1060,11 +1059,40 @@ function isChainCinema(name) {
   return CHAIN_PREFIXES.some((p) => name.startsWith(p));
 }
 
-function cinemaCardBadge(name) {
-  if (!name) return null;
-  if (name.startsWith("UGC")) return "🎫 UGC Illimité";
-  if (name.startsWith("Pathé")) return "🎫 Pass Pathé";
-  return null;
+// Cinémas indépendants partenaires (hors UGC/MK2/Pathé, dont le nom ne suffit pas à
+// deviner l'acceptation d'une carte) — vérifié sur ugc.fr et les listes CinéPass Pathé.
+const UGC_ILLIMITE_PARTNERS = new Set([
+  "Chaplin Denfert", "Chaplin Saint Lambert", "Christine Cinema Club", "Cinéma du Panthéon",
+  "Ecoles Cinema Club", "Elysées Lincoln", "Escurial", "Espace Saint-Michel",
+  "Filmothèque du Quartier Latin", "Jeu de Paume", "L'Archipel", "L'Arlequin",
+  "L'Entrepôt", "L'Épée de Bois", "Le Balzac", "Le Brady", "Le Champo",
+  "Le Cinéma des Cinéastes", "Le Grand Action", "Le Grand Rex", "Le Louxor",
+  "Les 3 Luxembourg", "Les 5 Caumartin", "Les 7 Parnassiens", "Lucernaire",
+  "Luminor Hôtel de Ville", "Mac-Mahon", "Majestic Bastille", "Majestic Passy",
+  "Max Linder Panorama", "Nouvel Odéon", "Publicis Cinémas", "Reflet Medicis",
+  "Saint-André des Arts", "Studio Galande", "Studio des Ursulines",
+]);
+
+const PATHE_PASS_PARTNERS = new Set([
+  "7 Batignolles", "Chaplin Denfert", "Chaplin Saint Lambert", "Christine Cinema Club",
+  "Cinéma du Panthéon", "Ecoles Cinema Club", "Elysées Lincoln", "Escurial",
+  "Espace Saint-Michel", "Filmothèque du Quartier Latin", "L'Entrepôt", "L'Épée de Bois",
+  "Le Balzac", "Le Brady", "Le Cinéma des Cinéastes", "Le Grand Action",
+  "Les 3 Luxembourg", "Les 5 Caumartin", "Les 7 Parnassiens", "Luminor Hôtel de Ville",
+  "Mac-Mahon", "Majestic Passy", "Max Linder Panorama", "Nouvel Odéon",
+  "Publicis Cinémas", "Studio des Ursulines",
+]);
+
+function cinemaCardBadges(name) {
+  if (!name) return [];
+  const badges = [];
+  if (name.startsWith("UGC") || name.startsWith("MK2") || UGC_ILLIMITE_PARTNERS.has(name)) {
+    badges.push("🎫 UGC Illimité");
+  }
+  if (name.startsWith("Pathé") || PATHE_PASS_PARTNERS.has(name)) {
+    badges.push("🎫 Pass Pathé");
+  }
+  return badges;
 }
 
 function cinePinIcon(count, name) {
@@ -1229,11 +1257,10 @@ function renderNearbyPanel(lat, lon) {
     nameSpan.className = "nearby-name";
     nameSpan.textContent = n.name;
     nameWrap.appendChild(nameSpan);
-    const cardBadge = cinemaCardBadge(n.name);
-    if (cardBadge) {
+    for (const badge of cinemaCardBadges(n.name)) {
       const card = document.createElement("span");
       card.className = "card-badge";
-      card.textContent = cardBadge;
+      card.textContent = badge;
       nameWrap.appendChild(card);
     }
     const distSpan = document.createElement("span");
@@ -1441,11 +1468,10 @@ function renderCinemaPanel(name) {
   title.className = "map-panel-title";
   title.textContent = name;
   header.appendChild(title);
-  const cardBadge = cinemaCardBadge(name);
-  if (cardBadge) {
+  for (const badge of cinemaCardBadges(name)) {
     const card = document.createElement("span");
     card.className = "card-badge";
-    card.textContent = cardBadge;
+    card.textContent = badge;
     header.appendChild(card);
   }
   mapPanelEl.appendChild(header);
