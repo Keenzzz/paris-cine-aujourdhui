@@ -985,7 +985,7 @@ function syncMapPlacement() {
 
 function syncMarathonPlacement() {
   const marathonBlockEl = document.getElementById("marathon-block");
-  if (!marathonBlockEl || !mapRailEl || !mapPanelEl) return;
+  if (!marathonBlockEl || !mapRailEl) return;
   const isMobile = window.matchMedia("(max-width: 760px)").matches;
   const showOnMobile = isMobile && activeTab === "marathon";
   marathonBlockEl.classList.toggle("tab-active", showOnMobile);
@@ -995,7 +995,7 @@ function syncMarathonPlacement() {
       movieListEl.parentElement.insertBefore(marathonBlockEl, movieListEl);
     }
   } else if (marathonBlockEl.parentElement !== mapRailEl) {
-    mapRailEl.insertBefore(marathonBlockEl, mapPanelEl);
+    mapRailEl.appendChild(marathonBlockEl);
   }
 }
 

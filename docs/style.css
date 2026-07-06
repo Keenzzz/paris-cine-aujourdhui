@@ -310,7 +310,15 @@ a { color: inherit; }
   margin-left: 10px;
 }
 
+#map-body {
+  display: flex;
+  align-items: stretch;
+  gap: 10px;
+}
+
 #cine-map {
+  flex: 1.4 1 auto;
+  min-width: 0;
   height: 520px;
   border-radius: 6px;
   border: 1px solid #2c2619;
@@ -425,11 +433,14 @@ a { color: inherit; }
 }
 
 #map-panel {
-  flex: 1;
-  min-height: 0;
+  flex: 1 1 auto;
+  min-width: 150px;
+  max-width: 200px;
   overflow-y: auto;
-  border-top: 1px solid #241f18;
-  padding-top: 14px;
+  border: 1px solid #2c2619;
+  border-radius: 6px;
+  background: #1c1811;
+  padding: 14px;
 }
 
 .map-panel-empty {
@@ -1412,6 +1423,15 @@ footer a {
 
   #map-rail.tab-active {
     display: flex;
+  }
+
+  #map-body {
+    flex-direction: column;
+  }
+
+  #map-panel {
+    max-width: none;
+    max-height: 280px;
   }
 
   #marathon-block.has-combo {
