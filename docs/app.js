@@ -1356,6 +1356,18 @@ function marathonComboKey(combo) {
   return `${combo.a.cinema}|${combo.a.time}|${combo.b.cinema}|${combo.b.time}`;
 }
 
+// Évite d'enchaîner un film "tout public" avec quelque chose de nettement plus adulte/sombre.
+const MARATHON_KIDS_GENRES = new Set(["fam", "ani"]);
+const MARATHON_MATURE_GENRES = new Set(["dra", "hor", "thr", "war", "cod", "noi", "ero", "jud"]);
+
+function marathonGenresIncompatible(genresA, genresB) {
+  const aKids = genresA.some((g) => MARATHON_KIDS_GENRES.has(g));
+  const bKids = genresB.some((g) => MARATHON_KIDS_GENRES.has(g));
+  const aMature = genresA.some((g) => MARATHON_MATURE_GENRES.has(g));
+  const bMature = genresB.some((g) => MARATHON_MATURE_GENRES.has(g));
+  return (aKids && bMature) || (bKids && aMature);
+}
+
 function computeMarathonCombos() {
   const now = new Date();
   const nowMin = now.getHours() * 60 + now.getMinutes();
@@ -1365,20 +1377,22 @@ function computeMarathonCombos() {
     if (!li._showtimes) continue;
     const durationMin = parseDurationMinutes(li.dataset.duration);
     if (!durationMin) continue;
+    const genres = (li.dataset.genres || "").split(",").filter(Boolean);
     for (const s of li._showtimes) {
       if (!s.start || !s.title || !s.start.startsWith(currentDate)) continue;
       if (!cinemaCoords[s.title]) continue;
       const [hh, mm] = s.start.slice(11, 16).split(":").map(Number);
       const startMin = hh * 60 + mm;
       if (startMin < nowMin) continue;
-      sessions.push({ cinema: s.title, movieTitle: li.dataset.title, time: s.start.slice(11, 16), book: s.book, startMin, endMin: startMin + durationMin });
+      sessions.push({ cinema: s.title, movieTitle: li.dataset.title, genres, time: s.start.slice(11, 16), book: s.book, startMin, endMin: startMin + durationMin });
     }
   }
 
   const all = [];
   for (const a of sessions) {
     for (const b of sessions) {
-      if (a.cinema === b.cinema) continue;
+      if (a.cinema === b.cinema || a.movieTitle === b.movieTitle) continue;
+      if (marathonGenresIncompatible(a.genres, b.genres)) continue;
       const gap = b.startMin - a.endMin;
       if (gap < MARATHON_MIN_GAP || gap > MARATHON_MAX_GAP) continue;
       const coordsA = cinemaCoords[a.cinema];
@@ -1387,23 +1401,34 @@ function computeMarathonCombos() {
       if (distKm > MARATHON_MAX_WALK_KM) continue;
       const walkMin = Math.max(1, Math.round((distKm / 5) * 60));
       if (gap < walkMin + MARATHON_MIN_GAP) continue;
-      all.push({ a, b, walkMin, gap });
+      const sameGenre = a.genres.some((g) => b.genres.includes(g));
+      all.push({ a, b, walkMin, gap, sameGenre });
     }
   }
   if (all.length === 0) return [];
 
-  all.sort((x, y) => x.gap - y.gap);
+  // Priorise les enchaînements qui partagent un genre, puis le battement le plus court.
+  all.sort((x, y) => (x.sameGenre === y.sameGenre ? x.gap - y.gap : (x.sameGenre ? -1 : 1)));
 
   const picked = [];
   const usedKeys = new Set();
+  const usedTitles = new Set();
+  const isAvailable = (c) => !usedKeys.has(marathonComboKey(c))
+    && !usedTitles.has(c.a.movieTitle) && !usedTitles.has(c.b.movieTitle);
+  const pick = (c) => {
+    picked.push(c);
+    usedKeys.add(marathonComboKey(c));
+    usedTitles.add(c.a.movieTitle);
+    usedTitles.add(c.b.movieTitle);
+  };
+
   for (const w of MARATHON_TIME_WINDOWS) {
-    const match = all.find((c) => c.a.startMin >= w.min && c.a.startMin <= w.max && !usedKeys.has(marathonComboKey(c)));
-    if (match) { picked.push(match); usedKeys.add(marathonComboKey(match)); }
+    const match = all.find((c) => c.a.startMin >= w.min && c.a.startMin <= w.max && isAvailable(c));
+    if (match) pick(match);
   }
   for (const c of all) {
     if (picked.length >= 3) break;
-    const key = marathonComboKey(c);
-    if (!usedKeys.has(key)) { picked.push(c); usedKeys.add(key); }
+    if (isAvailable(c)) pick(c);
   }
 
   return picked.slice(0, 3).sort((x, y) => x.a.startMin - y.a.startMin);
