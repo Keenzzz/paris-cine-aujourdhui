@@ -107,8 +107,9 @@
       <p id="geoloc-status"></p>
       <div id="map-body">
         <div id="cine-map"></div>
-        <div id="map-panel">
-          <p class="map-panel-empty">Cliquez sur un cinéma pour voir ses séances.</p>
+        <div id="map-panel" hidden>
+          <button type="button" id="map-panel-close" aria-label="Fermer et réagrandir la carte">×</button>
+          <div id="map-panel-content"></div>
         </div>
       </div>
       <div id="map-legend"><span class="map-legend-dot"></span> Cinéma indépendant / art et essai</div>

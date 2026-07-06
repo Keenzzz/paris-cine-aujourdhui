@@ -98,7 +98,7 @@ let moviesToday   = [];
 let _searchToken  = 0;
 
 let movieListEl, villetteListEl, watchlistEl, countLabelEl, searchEl;
-let showtimeFiltersEl, sortBarEl, footerSourceEl, mapPanelEl, mapRailEl, layoutEl, watchlistHintEl;
+let showtimeFiltersEl, sortBarEl, footerSourceEl, mapPanelEl, mapPanelWrapEl, mapRailEl, layoutEl, watchlistHintEl;
 
 const CINEMAS_URL = "cinemas.json";
 let cinemaCoords  = {};
@@ -1121,8 +1121,22 @@ function nearestCinemas(lat, lon, limit = 5) {
     .slice(0, limit);
 }
 
+function openMapPanel() {
+  if (!mapPanelWrapEl || !mapPanelWrapEl.hidden) return;
+  mapPanelWrapEl.hidden = false;
+  if (cineMap) setTimeout(() => cineMap.invalidateSize(), 50);
+}
+
+function closeMapPanel() {
+  if (!mapPanelWrapEl) return;
+  mapPanelWrapEl.hidden = true;
+  selectedCinema = null;
+  if (cineMap) setTimeout(() => cineMap.invalidateSize(), 50);
+}
+
 function renderNearbyPanel(lat, lon) {
   const nearest = nearestCinemas(lat, lon, 5);
+  openMapPanel();
   mapPanelEl.innerHTML = "";
 
   const title = document.createElement("p");
@@ -1337,6 +1351,7 @@ function formatPanelDate(date) {
 function renderCinemaPanel(name) {
   const byCinema = buildCinemaAggregation();
   const entry = byCinema.get(name);
+  openMapPanel();
   mapPanelEl.innerHTML = "";
 
   const title = document.createElement("p");
@@ -1413,7 +1428,8 @@ async function init() {
   sortBarEl         = document.getElementById("sort-bar");
   footerSourceEl    = document.getElementById("footer-source");
   backToTopBtn      = document.getElementById("back-to-top");
-  mapPanelEl        = document.getElementById("map-panel");
+  mapPanelEl        = document.getElementById("map-panel-content");
+  mapPanelWrapEl    = document.getElementById("map-panel");
   mapRailEl         = document.getElementById("map-rail");
   layoutEl          = document.getElementById("layout");
 
@@ -1425,6 +1441,7 @@ async function init() {
   const cinemasPromise = loadCinemaCoords();
   initCineMap();
   initGeoloc();
+  document.getElementById("map-panel-close").addEventListener("click", closeMapPanel);
 
   const stored = await storage.get(WATCHLIST_KEY);
   watchlist = stored[WATCHLIST_KEY] || [];

@@ -433,6 +433,9 @@ a { color: inherit; }
 }
 
 #map-panel {
+  position: relative;
+  display: flex;
+  flex-direction: column;
   flex: 1 1 auto;
   min-width: 150px;
   max-width: 200px;
@@ -441,6 +444,38 @@ a { color: inherit; }
   border-radius: 6px;
   background: #1c1811;
   padding: 14px;
+}
+
+#map-panel[hidden] {
+  display: none;
+}
+
+#map-panel-close {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid #2c2619;
+  border-radius: 50%;
+  background: none;
+  color: #9a917c;
+  font-size: 13px;
+  line-height: 1;
+  cursor: pointer;
+  transition: color 0.15s, border-color 0.15s;
+}
+
+#map-panel-close:hover {
+  color: #d8cfba;
+  border-color: #d9603b;
+}
+
+#map-panel-content {
+  padding-right: 20px;
 }
 
 .map-panel-empty {
