@@ -106,6 +106,9 @@ let cineMap       = null;
 let cineClusterGroup = null;
 let cineMarkers   = new Map();
 let selectedCinema = null;
+let userMarker    = null;
+let mapTimeFilterMin = null;
+const DEFAULT_RUNTIME_MIN = 150;
 
 function initDropdown(rootEl, onSelect) {
   const trigger = rootEl.querySelector(".dd-trigger");
@@ -1074,10 +1077,20 @@ function buildCinemaAggregation() {
       const date = s.start.slice(0, 10);
       if (date === currentDate) entry.today++;
       if (!entry.byDate[date]) entry.byDate[date] = [];
-      entry.byDate[date].push({ time: s.start.slice(11, 16), movieTitle, type: s.type, book: s.book });
+      entry.byDate[date].push({
+        time: s.start.slice(11, 16), movieTitle, type: s.type, book: s.book,
+        durationMin: parseDurationMinutes(li.dataset.duration),
+      });
     }
   }
   return byCinema;
+}
+
+function sessionActiveAtMinute(item, minute) {
+  const [hh, mm] = item.time.split(":").map(Number);
+  const start = hh * 60 + mm;
+  const duration = item.durationMin || DEFAULT_RUNTIME_MIN;
+  return minute >= start && minute <= start + duration;
 }
 
 function updateCineMapMarkers() {
@@ -1086,7 +1099,12 @@ function updateCineMapMarkers() {
 
   for (const [name, coords] of Object.entries(cinemaCoords)) {
     const entry = byCinema.get(name);
-    const count = entry ? entry.today : 0;
+    let activeSessions = null;
+    let count = entry ? entry.today : 0;
+    if (entry && mapTimeFilterMin !== null) {
+      activeSessions = (entry.byDate[currentDate] || []).filter((it) => sessionActiveAtMinute(it, mapTimeFilterMin));
+      count = activeSessions.length;
+    }
     if (count === 0) {
       const existing = cineMarkers.get(name);
       if (existing) { cineClusterGroup.removeLayer(existing); cineMarkers.delete(name); }
@@ -1101,10 +1119,147 @@ function updateCineMapMarkers() {
     } else {
       marker.setIcon(cinePinIcon(count, name));
     }
-    marker.bindTooltip(name);
+    const tooltip = activeSessions && activeSessions.length
+      ? `${name} — ${activeSessions.map((s) => s.movieTitle).join(", ")}`
+      : name;
+    marker.bindTooltip(tooltip);
   }
 
   if (selectedCinema) renderCinemaPanel(selectedCinema);
+}
+
+// ── Filtre horaire sur la carte ─────────────────────────────────────────────
+
+function formatSliderTime(min) {
+  const h = Math.floor(min / 60);
+  const m = min % 60;
+  return `${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}`;
+}
+
+function roundedNowMinutes() {
+  const now = new Date();
+  const min = Math.round((now.getHours() * 60 + now.getMinutes()) / 15) * 15;
+  return Math.min(1439, Math.max(600, min));
+}
+
+function initMapTimeFilter() {
+  const toggle = document.getElementById("map-time-toggle");
+  const row = document.getElementById("map-time-slider-row");
+  const slider = document.getElementById("map-time-slider");
+  const valueEl = document.getElementById("map-time-slider-value");
+  if (!toggle || !row || !slider || !valueEl) return;
+
+  slider.value = String(roundedNowMinutes());
+  valueEl.textContent = formatSliderTime(Number(slider.value));
+
+  toggle.addEventListener("click", () => {
+    const next = toggle.getAttribute("aria-pressed") !== "true";
+    toggle.setAttribute("aria-pressed", String(next));
+    toggle.classList.toggle("active", next);
+    row.hidden = !next;
+    mapTimeFilterMin = next ? Number(slider.value) : null;
+    updateCineMapMarkers();
+  });
+
+  slider.addEventListener("input", () => {
+    valueEl.textContent = formatSliderTime(Number(slider.value));
+    if (toggle.getAttribute("aria-pressed") === "true") {
+      mapTimeFilterMin = Number(slider.value);
+      updateCineMapMarkers();
+    }
+  });
+}
+
+// ── Géolocalisation « autour de moi » ───────────────────────────────────────
+
+function userLocationIcon() {
+  return L.divIcon({ className: "user-loc-pin", html: "<span></span>", iconSize: [14, 14], iconAnchor: [7, 7] });
+}
+
+function nearestCinemas(lat, lon, limit = 5) {
+  return Object.entries(cinemaCoords)
+    .map(([name, coords]) => ({ name, coords, distKm: haversineKm(lat, lon, coords.lat, coords.lon) }))
+    .sort((a, b) => a.distKm - b.distKm)
+    .slice(0, limit);
+}
+
+function renderNearbyPanel(lat, lon) {
+  const nearest = nearestCinemas(lat, lon, 5);
+  mapPanelEl.innerHTML = "";
+
+  const title = document.createElement("p");
+  title.className = "map-panel-title";
+  title.textContent = "Cinémas les plus proches";
+  mapPanelEl.appendChild(title);
+
+  const list = document.createElement("ul");
+  list.className = "nearby-list";
+  for (const n of nearest) {
+    const li = document.createElement("li");
+    const btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = "nearby-btn";
+    const distLabel = n.distKm < 1 ? `${Math.round(n.distKm * 1000)} m` : `${n.distKm.toFixed(1)} km`;
+    const nameSpan = document.createElement("span");
+    nameSpan.className = "nearby-name";
+    nameSpan.textContent = n.name;
+    const distSpan = document.createElement("span");
+    distSpan.className = "nearby-dist";
+    distSpan.textContent = distLabel;
+    btn.appendChild(nameSpan);
+    btn.appendChild(distSpan);
+    btn.addEventListener("click", () => {
+      selectedCinema = n.name;
+      cineMap.setView([n.coords.lat, n.coords.lon], 15);
+      renderCinemaPanel(n.name);
+    });
+    li.appendChild(btn);
+    list.appendChild(li);
+  }
+  mapPanelEl.appendChild(list);
+}
+
+function initGeoloc() {
+  const btn = document.getElementById("geoloc-btn");
+  const statusEl = document.getElementById("geoloc-status");
+  if (!btn) return;
+
+  btn.addEventListener("click", () => {
+    if (!navigator.geolocation) {
+      if (statusEl) statusEl.textContent = "Géolocalisation non disponible sur ce navigateur.";
+      return;
+    }
+    btn.disabled = true;
+    btn.textContent = "📍 Localisation…";
+    if (statusEl) statusEl.textContent = "";
+
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        const { latitude, longitude } = pos.coords;
+        btn.disabled = false;
+        btn.textContent = "📍 Autour de moi";
+        if (!userMarker) {
+          userMarker = L.marker([latitude, longitude], { icon: userLocationIcon(), zIndexOffset: 1000 }).addTo(cineMap);
+          userMarker.bindTooltip("Vous êtes ici");
+        } else {
+          userMarker.setLatLng([latitude, longitude]);
+        }
+        cineMap.setView([latitude, longitude], 14);
+        selectedCinema = null;
+        renderNearbyPanel(latitude, longitude);
+      },
+      (err) => {
+        btn.disabled = false;
+        btn.textContent = "📍 Autour de moi";
+        if (statusEl) {
+          statusEl.textContent = err.code === err.PERMISSION_DENIED
+            ? "Position refusée — autorisez la géolocalisation pour voir les cinémas proches."
+            : "Impossible de récupérer votre position.";
+        }
+      },
+      { enableHighAccuracy: true, timeout: 8000, maximumAge: 60000 }
+    );
+  });
 }
 
 // ── Idée de marathon ────────────────────────────────────────────────────────
@@ -1331,6 +1486,8 @@ async function init() {
 
   const cinemasPromise = loadCinemaCoords();
   initCineMap();
+  initMapTimeFilter();
+  initGeoloc();
 
   const stored = await storage.get(WATCHLIST_KEY);
   watchlist = stored[WATCHLIST_KEY] || [];

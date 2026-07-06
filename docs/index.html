@@ -101,6 +101,17 @@
     </div>
     <aside id="map-rail">
       <div class="rail-block-h">Carte des cinémas</div>
+      <div id="map-controls">
+        <button type="button" id="geoloc-btn">📍 Autour de moi</button>
+        <div id="map-time-filter">
+          <button type="button" id="map-time-toggle" aria-pressed="false">🕐 Filtrer par heure</button>
+          <div id="map-time-slider-row" hidden>
+            <input type="range" id="map-time-slider" min="600" max="1439" step="15" value="1200">
+            <span id="map-time-slider-value">20:00</span>
+          </div>
+        </div>
+      </div>
+      <p id="geoloc-status"></p>
       <div id="cine-map"></div>
       <div id="map-legend"><span class="map-legend-dot"></span> Cinéma indépendant / art et essai</div>
       <p id="map-hint">Choisissez un créneau horaire (matin, après-midi, soir) pour de meilleurs résultats.</p>
