@@ -82,6 +82,7 @@ const VILLETTE_PROGRAM = [
 let activeTab     = "all";
 let activeWindow  = "all";
 let activeVersion = "all";
+let activeCard    = "all";
 let activeSort    = "alpha";
 let activeSortDir = "asc";
 let activeView    = "list";
@@ -277,7 +278,13 @@ function showtimeMatchesFilters(s) {
   const matchesVersion = activeVersion === "all"
     || (activeVersion === "vo" && s.type && /^VO/i.test(s.type))
     || (activeVersion === "vf" && (!s.type || /^VF/i.test(s.type)));
-  return matchesTime && matchesVersion;
+  const matchesCard = activeCard === "all"
+    || cinemaCardBadges(s.title).some((b) => b.type === activeCard);
+  return matchesTime && matchesVersion && matchesCard;
+}
+
+function isAnyShowtimeFilterActive() {
+  return activeWindow !== "all" || activeVersion !== "all" || activeCard !== "all";
 }
 
 function countVisibleCinemas() {
@@ -287,7 +294,7 @@ function countVisibleCinemas() {
     if (!li._showtimes) continue;
     for (const s of li._showtimes) {
       if (!s.start.startsWith(currentDate)) continue;
-      if ((activeWindow !== "all" || activeVersion !== "all") && !showtimeMatchesFilters(s)) continue;
+      if (isAnyShowtimeFilterActive() && !showtimeMatchesFilters(s)) continue;
       if (s.title) cinemas.add(s.title);
     }
   }
@@ -347,7 +354,7 @@ function buildShowtimeRow(s) {
 
 function renderShowtimesList(showtimesEl, showtimes) {
   showtimesEl.innerHTML = "";
-  const noFilter = activeWindow === "all" && activeVersion === "all";
+  const noFilter = !isAnyShowtimeFilterActive();
   const filtered = noFilter ? showtimes : showtimes.filter(showtimeMatchesFilters);
   if (filtered.length === 0) {
     const emptyLi = document.createElement("li");
@@ -650,7 +657,7 @@ async function applyFilters() {
 
   if (q === "") {
     updateCount();
-    if (activeWindow !== "all" || activeVersion !== "all") applyShowtimeFilters();
+    if (isAnyShowtimeFilterActive()) applyShowtimeFilters();
     return;
   }
 
@@ -682,11 +689,11 @@ async function applyFilters() {
   }
 
   if (token !== _searchToken) return;
-  if (activeWindow !== "all" || activeVersion !== "all") applyShowtimeFilters();
+  if (isAnyShowtimeFilterActive()) applyShowtimeFilters();
 }
 
 async function applyShowtimeFilters() {
-  const noFilter = activeWindow === "all" && activeVersion === "all";
+  const noFilter = !isAnyShowtimeFilterActive();
   if (noFilter) {
     for (const li of movieListEl.children) li.classList.remove("time-hidden");
     refreshOpenShowtimes();
@@ -1368,6 +1375,18 @@ function marathonGenresIncompatible(genresA, genresB) {
   return (aKids && bMature) || (bKids && aMature);
 }
 
+// Le marathon ne propose que des cinémas éligibles à une carte (UGC Illimité ou Pass
+// Pathé) : sans intérêt de marcher entre deux salles à plein tarif. Si "Ma carte" cible
+// une carte précise, on se limite à celle-ci ; sinon les deux réseaux sont mélangés.
+function marathonCardEligible(cinemaName) {
+  const badges = cinemaCardBadges(cinemaName);
+  const hasUgc = badges.some((b) => b.type === "ugc");
+  const hasPathe = badges.some((b) => b.type === "pathe");
+  if (activeCard === "ugc") return hasUgc;
+  if (activeCard === "pathe") return hasPathe;
+  return hasUgc || hasPathe;
+}
+
 function computeMarathonCombos() {
   const now = new Date();
   const nowMin = now.getHours() * 60 + now.getMinutes();
@@ -1381,6 +1400,7 @@ function computeMarathonCombos() {
     for (const s of li._showtimes) {
       if (!s.start || !s.title || !s.start.startsWith(currentDate)) continue;
       if (!cinemaCoords[s.title]) continue;
+      if (!marathonCardEligible(s.title)) continue;
       const [hh, mm] = s.start.slice(11, 16).split(":").map(Number);
       const startMin = hh * 60 + mm;
       if (startMin < nowMin) continue;
@@ -1688,6 +1708,13 @@ async function init() {
     activeVersion = value;
     applyShowtimeFilters();
     updateCineMapMarkers();
+  });
+
+  initDropdown(document.getElementById("card-filter-dd"), (value) => {
+    activeCard = value;
+    applyShowtimeFilters();
+    updateCineMapMarkers();
+    renderMarathonBlock();
   });
 
   for (const btn of document.querySelectorAll(".sort-btn")) {
