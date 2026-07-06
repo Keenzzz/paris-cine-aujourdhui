@@ -107,6 +107,8 @@ let cineClusterGroup = null;
 let cineMarkers   = new Map();
 let selectedCinema = null;
 let userMarker    = null;
+let mapTimeFilterMin = null;
+const MAP_PANEL_REVEAL_COUNT = 5;
 
 function initDropdown(rootEl, onSelect) {
   const trigger = rootEl.querySelector(".dd-trigger");
@@ -1081,13 +1083,23 @@ function buildCinemaAggregation() {
   return byCinema;
 }
 
+function minutesFromTimeStr(t) {
+  const [hh, mm] = t.split(":").map(Number);
+  return hh * 60 + mm;
+}
+
 function updateCineMapMarkers() {
   if (!cineMap || !cineClusterGroup) return;
   const byCinema = buildCinemaAggregation();
 
   for (const [name, coords] of Object.entries(cinemaCoords)) {
     const entry = byCinema.get(name);
-    const count = entry ? entry.today : 0;
+    let matching = null;
+    let count = entry ? entry.today : 0;
+    if (entry && mapTimeFilterMin !== null) {
+      matching = (entry.byDate[currentDate] || []).filter((it) => minutesFromTimeStr(it.time) >= mapTimeFilterMin);
+      count = matching.length;
+    }
     if (count === 0) {
       const existing = cineMarkers.get(name);
       if (existing) { cineClusterGroup.removeLayer(existing); cineMarkers.delete(name); }
@@ -1102,10 +1114,55 @@ function updateCineMapMarkers() {
     } else {
       marker.setIcon(cinePinIcon(count, name));
     }
-    marker.bindTooltip(name);
+    const tooltip = matching && matching.length
+      ? `${name} — ${matching.map((s) => s.movieTitle).join(", ")}`
+      : name;
+    marker.bindTooltip(tooltip);
   }
 
   if (selectedCinema) renderCinemaPanel(selectedCinema);
+}
+
+// ── Filtre horaire sur la carte ─────────────────────────────────────────────
+
+function formatSliderTime(min) {
+  const h = Math.floor(min / 60);
+  const m = min % 60;
+  return `${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}`;
+}
+
+function roundedNowMinutes() {
+  const now = new Date();
+  const min = Math.round((now.getHours() * 60 + now.getMinutes()) / 15) * 15;
+  return Math.min(1439, Math.max(600, min));
+}
+
+function initMapTimeFilter() {
+  const toggle = document.getElementById("map-time-toggle");
+  const row = document.getElementById("map-time-slider-row");
+  const slider = document.getElementById("map-time-slider");
+  const valueEl = document.getElementById("map-time-slider-value");
+  if (!toggle || !row || !slider || !valueEl) return;
+
+  slider.value = String(roundedNowMinutes());
+  valueEl.textContent = formatSliderTime(Number(slider.value));
+
+  toggle.addEventListener("click", () => {
+    const next = toggle.getAttribute("aria-pressed") !== "true";
+    toggle.setAttribute("aria-pressed", String(next));
+    toggle.classList.toggle("active", next);
+    row.hidden = !next;
+    mapTimeFilterMin = next ? Number(slider.value) : null;
+    updateCineMapMarkers();
+  });
+
+  slider.addEventListener("input", () => {
+    valueEl.textContent = formatSliderTime(Number(slider.value));
+    if (toggle.getAttribute("aria-pressed") === "true") {
+      mapTimeFilterMin = Number(slider.value);
+      updateCineMapMarkers();
+    }
+  });
 }
 
 // ── Géolocalisation « autour de moi » ───────────────────────────────────────
@@ -1375,24 +1432,57 @@ function renderCinemaPanel(name) {
   const listEl = document.createElement("ul");
   listEl.className = "showtimes";
 
+  function buildMapShowtimeRow(it) {
+    const li = document.createElement("li");
+    const link = document.createElement("a");
+    link.href = it.book || API_BASE;
+    link.target = "_blank";
+    link.rel = "noopener noreferrer";
+    link.textContent = `${it.time} — ${it.movieTitle}`;
+    li.appendChild(link);
+    if (it.type) {
+      const lang = document.createElement("span");
+      lang.className = "lang-badge";
+      lang.textContent = it.type;
+      li.appendChild(lang);
+    }
+    return li;
+  }
+
   function renderList(date) {
     listEl.innerHTML = "";
-    const items = entry.byDate[date].slice().sort((a, b) => a.time.localeCompare(b.time));
-    for (const it of items) {
-      const li = document.createElement("li");
-      const link = document.createElement("a");
-      link.href = it.book || API_BASE;
-      link.target = "_blank";
-      link.rel = "noopener noreferrer";
-      link.textContent = `${it.time} — ${it.movieTitle}`;
-      li.appendChild(link);
-      if (it.type) {
-        const lang = document.createElement("span");
-        lang.className = "lang-badge";
-        lang.textContent = it.type;
-        li.appendChild(lang);
-      }
-      listEl.appendChild(li);
+    let items = entry.byDate[date].slice().sort((a, b) => a.time.localeCompare(b.time));
+    if (mapTimeFilterMin !== null && date === currentDate) {
+      items = items.filter((it) => minutesFromTimeStr(it.time) >= mapTimeFilterMin);
+    }
+
+    if (items.length === 0) {
+      const emptyLi = document.createElement("li");
+      emptyLi.className = "empty";
+      emptyLi.textContent = "Pas de séance à partir de cette heure.";
+      listEl.appendChild(emptyLi);
+      return;
+    }
+
+    const hasOverflow = items.length > MAP_PANEL_REVEAL_COUNT;
+    const shown = hasOverflow ? items.slice(0, MAP_PANEL_REVEAL_COUNT) : items;
+    for (const it of shown) listEl.appendChild(buildMapShowtimeRow(it));
+
+    if (hasOverflow) {
+      const hidden = items.slice(MAP_PANEL_REVEAL_COUNT);
+      const moreLi = document.createElement("li");
+      moreLi.className = "showtimes-more";
+      const moreBtn = document.createElement("button");
+      moreBtn.type = "button";
+      moreBtn.className = "showtimes-more-btn";
+      moreBtn.textContent = `Voir ${hidden.length} séance${hidden.length !== 1 ? "s" : ""} de plus`;
+      moreBtn.addEventListener("click", (e) => {
+        e.stopPropagation();
+        moreLi.remove();
+        for (const it of hidden) listEl.appendChild(buildMapShowtimeRow(it));
+      });
+      moreLi.appendChild(moreBtn);
+      listEl.appendChild(moreLi);
     }
   }
 
@@ -1441,6 +1531,7 @@ async function init() {
   const cinemasPromise = loadCinemaCoords();
   initCineMap();
   initGeoloc();
+  initMapTimeFilter();
   document.getElementById("map-panel-close").addEventListener("click", closeMapPanel);
 
   const stored = await storage.get(WATCHLIST_KEY);

@@ -227,7 +227,8 @@ a { color: inherit; }
   gap: 10px;
 }
 
-#geoloc-btn {
+#geoloc-btn,
+#map-time-toggle {
   background: none;
   border: 1px solid #2c2619;
   border-radius: 20px;
@@ -239,7 +240,8 @@ a { color: inherit; }
   transition: color 0.15s, border-color 0.15s, background 0.15s;
 }
 
-#geoloc-btn:hover {
+#geoloc-btn:hover,
+#map-time-toggle:hover {
   color: #d8cfba;
   border-color: #4f8f80;
 }
@@ -247,6 +249,40 @@ a { color: inherit; }
 #geoloc-btn:disabled {
   opacity: 0.6;
   cursor: default;
+}
+
+#map-time-toggle.active {
+  color: #1b1610;
+  background: #e0a944;
+  border-color: #e0a944;
+}
+
+#map-time-filter {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+#map-time-slider-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+#map-time-slider-row[hidden] {
+  display: none;
+}
+
+#map-time-slider {
+  accent-color: #e0a944;
+  width: 110px;
+}
+
+#map-time-slider-value {
+  font-size: 11px;
+  color: #e0a944;
+  font-weight: 700;
+  min-width: 34px;
 }
 
 #geoloc-status {
@@ -317,7 +353,7 @@ a { color: inherit; }
 }
 
 #cine-map {
-  flex: 1.4 1 auto;
+  flex: 1.1 1 auto;
   min-width: 0;
   height: 520px;
   border-radius: 6px;
@@ -437,8 +473,8 @@ a { color: inherit; }
   display: flex;
   flex-direction: column;
   flex: 1 1 auto;
-  min-width: 150px;
-  max-width: 200px;
+  min-width: 210px;
+  max-width: 270px;
   overflow-y: auto;
   border: 1px solid #2c2619;
   border-radius: 6px;
