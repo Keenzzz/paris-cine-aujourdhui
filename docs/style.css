@@ -219,6 +219,12 @@ a { color: inherit; }
   top: 0;
   max-height: 100vh;
   overflow-y: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+#map-rail::-webkit-scrollbar {
+  display: none;
 }
 
 #map-controls {
