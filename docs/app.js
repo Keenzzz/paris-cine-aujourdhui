@@ -336,6 +336,13 @@ function buildShowtimeRow(s) {
     lang.textContent = s.type;
     row.appendChild(lang);
   }
+  const cardBadge = cinemaCardBadge(s.title);
+  if (cardBadge) {
+    const card = document.createElement("span");
+    card.className = "card-badge";
+    card.textContent = cardBadge;
+    row.appendChild(card);
+  }
   return row;
 }
 
@@ -1053,6 +1060,13 @@ function isChainCinema(name) {
   return CHAIN_PREFIXES.some((p) => name.startsWith(p));
 }
 
+function cinemaCardBadge(name) {
+  if (!name) return null;
+  if (name.startsWith("UGC")) return "🎫 UGC Illimité";
+  if (name.startsWith("Pathé")) return "🎫 Pass Pathé";
+  return null;
+}
+
 function cinePinIcon(count, name) {
   const indep = !isChainCinema(name);
   return L.divIcon({
@@ -1209,13 +1223,23 @@ function renderNearbyPanel(lat, lon) {
     btn.type = "button";
     btn.className = "nearby-btn";
     const distLabel = n.distKm < 1 ? `${Math.round(n.distKm * 1000)} m` : `${n.distKm.toFixed(1)} km`;
+    const nameWrap = document.createElement("span");
+    nameWrap.className = "nearby-name-wrap";
     const nameSpan = document.createElement("span");
     nameSpan.className = "nearby-name";
     nameSpan.textContent = n.name;
+    nameWrap.appendChild(nameSpan);
+    const cardBadge = cinemaCardBadge(n.name);
+    if (cardBadge) {
+      const card = document.createElement("span");
+      card.className = "card-badge";
+      card.textContent = cardBadge;
+      nameWrap.appendChild(card);
+    }
     const distSpan = document.createElement("span");
     distSpan.className = "nearby-dist";
     distSpan.textContent = distLabel;
-    btn.appendChild(nameSpan);
+    btn.appendChild(nameWrap);
     btn.appendChild(distSpan);
     btn.addEventListener("click", () => {
       selectedCinema = n.name;
@@ -1411,10 +1435,20 @@ function renderCinemaPanel(name) {
   openMapPanel();
   mapPanelEl.innerHTML = "";
 
+  const header = document.createElement("div");
+  header.className = "map-panel-header";
   const title = document.createElement("p");
   title.className = "map-panel-title";
   title.textContent = name;
-  mapPanelEl.appendChild(title);
+  header.appendChild(title);
+  const cardBadge = cinemaCardBadge(name);
+  if (cardBadge) {
+    const card = document.createElement("span");
+    card.className = "card-badge";
+    card.textContent = cardBadge;
+    header.appendChild(card);
+  }
+  mapPanelEl.appendChild(header);
 
   if (!entry || Object.keys(entry.byDate).length === 0) {
     const empty = document.createElement("p");

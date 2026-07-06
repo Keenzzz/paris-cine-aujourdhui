@@ -341,6 +341,13 @@ a { color: inherit; }
   background: rgba(79, 143, 128, 0.08);
 }
 
+.nearby-name-wrap {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+}
+
 .nearby-name {
   font-family: Georgia, "Iowan Old Style", serif;
   font-weight: 700;
@@ -534,6 +541,27 @@ a { color: inherit; }
   font-size: 14px;
   color: #f6efe1;
   margin: 0 0 10px;
+}
+
+.map-panel-header {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.map-panel-header .map-panel-title {
+  margin: 0;
+}
+
+.card-badge {
+  font-size: 9px;
+  color: #6f6656;
+  border: 1px solid #332c20;
+  border-radius: 2px;
+  padding: 0 4px;
+  white-space: nowrap;
 }
 
 .leaflet-tooltip {
