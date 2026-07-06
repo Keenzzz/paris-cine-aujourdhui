@@ -564,6 +564,16 @@ a { color: inherit; }
   white-space: nowrap;
 }
 
+.card-badge-ugc {
+  color: #4da6ff;
+  border-color: #1f4e73;
+}
+
+.card-badge-pathe {
+  color: #f0d045;
+  border-color: #6b5c1c;
+}
+
 .leaflet-tooltip {
   background: #1c1811;
   color: #f3ede0;

@@ -338,8 +338,8 @@ function buildShowtimeRow(s) {
   }
   for (const badge of cinemaCardBadges(s.title)) {
     const card = document.createElement("span");
-    card.className = "card-badge";
-    card.textContent = badge;
+    card.className = `card-badge card-badge-${badge.type}`;
+    card.textContent = badge.label;
     row.appendChild(card);
   }
   return row;
@@ -1087,10 +1087,10 @@ function cinemaCardBadges(name) {
   if (!name) return [];
   const badges = [];
   if (name.startsWith("UGC") || name.startsWith("MK2") || UGC_ILLIMITE_PARTNERS.has(name)) {
-    badges.push("🎫 UGC Illimité");
+    badges.push({ type: "ugc", label: "🎫 UGC Illimité" });
   }
   if (name.startsWith("Pathé") || PATHE_PASS_PARTNERS.has(name)) {
-    badges.push("🎫 Pass Pathé");
+    badges.push({ type: "pathe", label: "🎫 Pass Pathé" });
   }
   return badges;
 }
@@ -1259,8 +1259,8 @@ function renderNearbyPanel(lat, lon) {
     nameWrap.appendChild(nameSpan);
     for (const badge of cinemaCardBadges(n.name)) {
       const card = document.createElement("span");
-      card.className = "card-badge";
-      card.textContent = badge;
+      card.className = `card-badge card-badge-${badge.type}`;
+      card.textContent = badge.label;
       nameWrap.appendChild(card);
     }
     const distSpan = document.createElement("span");
@@ -1495,8 +1495,8 @@ function renderCinemaPanel(name) {
   header.appendChild(title);
   for (const badge of cinemaCardBadges(name)) {
     const card = document.createElement("span");
-    card.className = "card-badge";
-    card.textContent = badge;
+    card.className = `card-badge card-badge-${badge.type}`;
+    card.textContent = badge.label;
     header.appendChild(card);
   }
   mapPanelEl.appendChild(header);
