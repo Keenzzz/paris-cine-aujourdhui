@@ -412,9 +412,14 @@ a { color: inherit; }
 #map-legend {
   display: flex;
   align-items: center;
-  gap: 7px;
+  flex-wrap: wrap;
+  gap: 6px 14px;
   font-size: 10.5px;
   color: #9a917c;
+}
+
+#map-legend .legend-item {
+  gap: 7px;
 }
 
 .map-legend-dot {
@@ -555,24 +560,38 @@ a { color: inherit; }
   margin: 0;
 }
 
-.card-badge {
-  font-size: 9px;
-  color: #6f6656;
-  border: 1px solid #332c20;
-  border-radius: 2px;
-  padding: 0 4px;
+.card-dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  align-self: center;
+}
+
+.card-dot-ugc {
+  background: #4da6ff;
+}
+
+.card-dot-pathe {
+  background: #f0d045;
+}
+
+.legend-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
   white-space: nowrap;
 }
 
-.card-badge-ugc {
-  color: #4da6ff;
-  border-color: #1f4e73;
+.legend-dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  flex-shrink: 0;
 }
 
-.card-badge-pathe {
-  color: #f0d045;
-  border-color: #6b5c1c;
-}
+.legend-dot-ugc { background: #4da6ff; }
+.legend-dot-pathe { background: #f0d045; }
 
 .leaflet-tooltip {
   background: #1c1811;
@@ -618,10 +637,23 @@ header {
   padding: 30px 28px 20px;
 }
 
+/* La date remonte sur cette ligne par marge négative : tout le contenu
+   du header-top doit rester aligné à droite pour ne pas la chevaucher. */
 #header-top {
   display: flex;
   justify-content: flex-end;
-  align-items: baseline;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 4px 18px;
+}
+
+#card-legend {
+  display: inline-flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 4px 14px;
+  font-size: 11px;
+  color: #7f7663;
 }
 
 #rating-legend {

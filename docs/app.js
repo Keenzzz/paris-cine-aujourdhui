@@ -350,10 +350,7 @@ function buildShowtimeRow(s) {
     row.appendChild(lang);
   }
   for (const badge of cinemaCardBadges(s.title)) {
-    const card = document.createElement("span");
-    card.className = `card-badge card-badge-${badge.type}`;
-    card.textContent = badge.label;
-    row.appendChild(card);
+    row.appendChild(makeCardDot(badge));
   }
   return row;
 }
@@ -1108,6 +1105,16 @@ function cinemaCardBadges(name) {
   return badges;
 }
 
+function makeCardDot(badge) {
+  const dot = document.createElement("span");
+  dot.className = `card-dot card-dot-${badge.type}`;
+  const label = badge.label.replace("🎫 ", "");
+  dot.title = label;
+  dot.setAttribute("role", "img");
+  dot.setAttribute("aria-label", label);
+  return dot;
+}
+
 function cinePinIcon(count, name) {
   const indep = !isChainCinema(name);
   return L.divIcon({
@@ -1273,10 +1280,7 @@ function renderNearbyPanel(lat, lon) {
     nameSpan.textContent = n.name;
     nameWrap.appendChild(nameSpan);
     for (const badge of cinemaCardBadges(n.name)) {
-      const card = document.createElement("span");
-      card.className = `card-badge card-badge-${badge.type}`;
-      card.textContent = badge.label;
-      nameWrap.appendChild(card);
+      nameWrap.appendChild(makeCardDot(badge));
     }
     const distSpan = document.createElement("span");
     distSpan.className = "nearby-dist";
@@ -1531,10 +1535,7 @@ function renderCinemaPanel(name) {
   title.textContent = name;
   header.appendChild(title);
   for (const badge of cinemaCardBadges(name)) {
-    const card = document.createElement("span");
-    card.className = `card-badge card-badge-${badge.type}`;
-    card.textContent = badge.label;
-    header.appendChild(card);
+    header.appendChild(makeCardDot(badge));
   }
   mapPanelEl.appendChild(header);
 
