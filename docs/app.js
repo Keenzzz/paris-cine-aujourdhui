@@ -1405,6 +1405,9 @@ function computeMarathonCombos() {
     const durationMin = parseDurationMinutes(li.dataset.duration);
     if (!durationMin) continue;
     const genres = (li.dataset.genres || "").split(",").filter(Boolean);
+    const year = parseInt(li.dataset.year, 10);
+    const culte = year > 0 && year <= CULTES_CUTOFF;
+    const rating = parseFloat(li.dataset.rating) || 0;
     for (const s of li._showtimes) {
       if (!s.start || !s.title || !s.start.startsWith(currentDate)) continue;
       if (!cinemaCoords[s.title]) continue;
@@ -1412,7 +1415,7 @@ function computeMarathonCombos() {
       const [hh, mm] = s.start.slice(11, 16).split(":").map(Number);
       const startMin = hh * 60 + mm;
       if (startMin < nowMin) continue;
-      sessions.push({ cinema: s.title, movieTitle: li.dataset.title, genres, time: s.start.slice(11, 16), book: s.book, startMin, endMin: startMin + durationMin });
+      sessions.push({ cinema: s.title, movieTitle: li.dataset.title, genres, culte, rating, time: s.start.slice(11, 16), book: s.book, startMin, endMin: startMin + durationMin });
     }
   }
 
@@ -1430,13 +1433,19 @@ function computeMarathonCombos() {
       const walkMin = Math.max(1, Math.round((distKm / 5) * 60));
       if (gap < walkMin + MARATHON_MIN_GAP) continue;
       const sameGenre = a.genres.some((g) => b.genres.includes(g));
-      all.push({ a, b, walkMin, gap, sameGenre });
+      const culteCount = (a.culte ? 1 : 0) + (b.culte ? 1 : 0);
+      const avgRating = (a.rating + b.rating) / 2;
+      all.push({ a, b, walkMin, gap, sameGenre, culteCount, avgRating });
     }
   }
   if (all.length === 0) return [];
 
-  // Priorise les enchaînements qui partagent un genre, puis le battement le plus court.
-  all.sort((x, y) => (x.sameGenre === y.sameGenre ? x.gap - y.gap : (x.sameGenre ? -1 : 1)));
+  // Priorise les enchaînements de films cultes, puis la meilleure note Letterboxd
+  // moyenne, puis le partage d'un genre, et enfin le battement le plus court.
+  all.sort((x, y) =>
+    (y.culteCount - x.culteCount)
+    || (y.avgRating - x.avgRating)
+    || (x.sameGenre === y.sameGenre ? x.gap - y.gap : (x.sameGenre ? -1 : 1)));
 
   const picked = [];
   const usedKeys = new Set();
