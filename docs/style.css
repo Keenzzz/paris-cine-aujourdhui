@@ -1044,8 +1044,10 @@ header {
 
 .showtimes li {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
-  gap: 6px;
+  gap: 4px 6px;
+  max-width: 100%;
   padding: 5px 12px;
   border: 1px solid #241f18;
   border-radius: 20px;
@@ -1056,7 +1058,9 @@ header {
   color: #9a917c;
   text-decoration: none;
   display: flex;
-  gap: 8px;
+  flex-wrap: wrap;
+  min-width: 0;
+  gap: 2px 8px;
   transition: color 0.15s;
 }
 
@@ -1472,6 +1476,14 @@ footer a {
 
 /* ── Responsive : écrans 13–14 pouces ────────────────────────────────── */
 
+/* Dès que la page n'est plus centrée, garder une marge sur les bords :
+   sans elle le rail gauche et la carte touchent le bord de l'écran. */
+@media (max-width: 1740px) {
+  #layout {
+    padding: 0 clamp(14px, 1.6vw, 28px);
+  }
+}
+
 @media (max-width: 1450px) {
   #rail {
     padding: 26px 20px 26px 0;
@@ -1502,9 +1514,9 @@ footer a {
   }
 }
 
-/* Colonne centrale étroite : les séances passent sous la fiche du film,
-   et le panneau de la carte passe sous la carte. */
-@media (max-width: 1240px) {
+/* Colonne centrale étroite (portables 13–14") : les séances passent sous
+   la fiche du film, et le panneau de la carte passe sous la carte. */
+@media (max-width: 1366px) {
   .movie-main,
   .watchlist-main {
     flex-direction: column;
@@ -1531,6 +1543,7 @@ footer a {
 @media (max-width: 1000px) {
   #layout {
     grid-template-columns: 1fr;
+    padding: 0; /* le rail et le contenu ont déjà leurs propres marges de 18px */
   }
 
   #rail {
