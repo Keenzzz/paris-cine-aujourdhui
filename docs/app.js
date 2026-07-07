@@ -153,6 +153,12 @@ function initDropdown(rootEl, onSelect) {
   });
 }
 
+// N'autorise que les liens http(s) — l'API pourrait renvoyer un schéma dangereux (javascript:).
+function safeHttpUrl(u, fallback) {
+  try { if (["https:", "http:"].includes(new URL(u).protocol)) return u; } catch {}
+  return fallback;
+}
+
 function todayISO() {
   const d = new Date();
   const pad = (n) => String(n).padStart(2, "0");
@@ -328,7 +334,7 @@ function buildShowtimeRow(s) {
   const time = s.start.slice(11, 16);
   const row = document.createElement("li");
   const link = document.createElement("a");
-  link.href = s.book || API_BASE;
+  link.href = safeHttpUrl(s.book, API_BASE);
   link.target = "_blank";
   link.rel = "noopener noreferrer";
   link.textContent = `${time} — `;
@@ -1166,7 +1172,9 @@ function updateCineMapMarkers() {
     const tooltip = matching && matching.length
       ? `${name} — ${matching.map((s) => s.movieTitle).join(", ")}`
       : name;
-    marker.bindTooltip(tooltip);
+    const tooltipEl = document.createElement("span");
+    tooltipEl.textContent = tooltip;
+    marker.bindTooltip(tooltipEl);
   }
 
   if (selectedCinema) renderCinemaPanel(selectedCinema);
@@ -1468,7 +1476,7 @@ function renderMarathonBlock() {
     div.className = "marathon-leg";
     const film = document.createElement("a");
     film.className = "marathon-film";
-    film.href = leg.book || API_BASE;
+    film.href = safeHttpUrl(leg.book, API_BASE);
     film.target = "_blank";
     film.rel = "noopener noreferrer";
     film.textContent = leg.movieTitle;
@@ -1540,7 +1548,7 @@ function renderCinemaPanel(name) {
   function buildMapShowtimeRow(it) {
     const li = document.createElement("li");
     const link = document.createElement("a");
-    link.href = it.book || API_BASE;
+    link.href = safeHttpUrl(it.book, API_BASE);
     link.target = "_blank";
     link.rel = "noopener noreferrer";
     link.textContent = `${it.time} — ${it.movieTitle}`;
