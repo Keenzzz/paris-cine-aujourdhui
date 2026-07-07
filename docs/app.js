@@ -989,7 +989,7 @@ function syncMobileTabPlacement() {
 
 function syncMapPlacement() {
   if (!mapRailEl) return;
-  const isMobile = window.matchMedia("(max-width: 760px)").matches;
+  const isMobile = window.matchMedia("(max-width: 1000px)").matches;
   const showOnMobile = isMobile && activeTab === "map";
   mapRailEl.classList.toggle("tab-active", showOnMobile);
 
@@ -1007,7 +1007,7 @@ function syncMapPlacement() {
 function syncMarathonPlacement() {
   const marathonBlockEl = document.getElementById("marathon-block");
   if (!marathonBlockEl || !mapRailEl) return;
-  const isMobile = window.matchMedia("(max-width: 760px)").matches;
+  const isMobile = window.matchMedia("(max-width: 1000px)").matches;
   const showOnMobile = isMobile && activeTab === "marathon";
   marathonBlockEl.classList.toggle("tab-active", showOnMobile);
 
@@ -1713,7 +1713,7 @@ async function init() {
     });
   }
 
-  window.matchMedia("(max-width: 760px)").addEventListener("change", syncMobileTabPlacement);
+  window.matchMedia("(max-width: 1000px)").addEventListener("change", syncMobileTabPlacement);
 
   initDropdown(document.getElementById("time-filter-dd"), (value) => {
     activeWindow = value;

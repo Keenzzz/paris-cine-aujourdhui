@@ -17,7 +17,7 @@ a { color: inherit; }
 
 #layout {
   display: grid;
-  grid-template-columns: 300px 1fr 560px;
+  grid-template-columns: clamp(220px, 17vw, 300px) minmax(0, 1fr) clamp(370px, 32vw, 560px);
   max-width: 1740px;
   margin: 0 auto;
   min-height: 100vh;
@@ -369,7 +369,7 @@ a { color: inherit; }
 #cine-map {
   flex: 1.1 1 auto;
   min-width: 0;
-  height: 520px;
+  height: clamp(360px, 50vh, 520px);
   border-radius: 6px;
   border: 1px solid #2c2619;
   background: #1c1811;
@@ -1470,9 +1470,65 @@ footer a {
   display: none;
 }
 
+/* ── Responsive : écrans 13–14 pouces ────────────────────────────────── */
+
+@media (max-width: 1450px) {
+  #rail {
+    padding: 26px 20px 26px 0;
+    gap: 24px;
+  }
+
+  #map-rail {
+    padding: 26px 0 26px 20px;
+  }
+
+  header {
+    padding: 24px 20px 16px;
+  }
+
+  #status, #sort-bar, .movie, .watchlist-entry, .villette-entry, .villette-date, footer {
+    padding-left: 20px;
+    padding-right: 20px;
+  }
+
+  .movie-main,
+  .watchlist-main {
+    gap: 20px;
+  }
+
+  .movie-info,
+  .watchlist-info {
+    flex-basis: 280px;
+  }
+}
+
+/* Colonne centrale étroite : les séances passent sous la fiche du film,
+   et le panneau de la carte passe sous la carte. */
+@media (max-width: 1240px) {
+  .movie-main,
+  .watchlist-main {
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .movie-info,
+  .watchlist-info {
+    flex: 0 0 auto;
+  }
+
+  #map-body {
+    flex-direction: column;
+  }
+
+  #map-panel {
+    max-width: none;
+    max-height: 280px;
+  }
+}
+
 /* ── Responsive : le rail passe au-dessus du contenu ─────────────────── */
 
-@media (max-width: 760px) {
+@media (max-width: 1000px) {
   #layout {
     grid-template-columns: 1fr;
   }
