@@ -25,7 +25,7 @@ Cloudflare Pages (`paris-cine-pages.pages.dev`), build dir `docs/`. Un simple `g
 - **Le seuil "mobile" (1000px) existe en double** : `@media (max-width: 1000px)` dans `docs/style.css` ET `matchMedia("(max-width: 1000px)")` à 3 endroits dans `docs/app.js`. Toujours modifier les deux ensemble.
 - `#layout` utilise des colonnes fluides (`clamp`/`minmax`) avec paliers à 1740px, 1450px, 1366px et 1000px — pas de largeurs fixes.
 - **Ne pas retirer le `flex-wrap: wrap`** des pastilles de séances (`.showtimes li` et leur `a`) : sans lui, le contenu déborde sur la carte quand la colonne est étroite.
-- **Le contenu de `#header-top` doit rester aligné à droite** (`flex-end`) : la date remonte sur cette ligne par marge négative et chevaucherait tout contenu placé à gauche.
+- `#date-label` est le **premier enfant flex de `#header-top`** avec `margin-right: auto` (date à gauche, légendes à droite, wrap propre en dessous). Ne pas revenir à l'ancien hack "date remontée par marge négative" : il provoquait des chevauchements de texte entre ~1000-1300px et sous ~380px.
 
 ## Points de repère dans le code
 

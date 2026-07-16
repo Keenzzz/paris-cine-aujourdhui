@@ -452,6 +452,14 @@ a { color: inherit; }
   gap: 10px;
 }
 
+.marathon-empty {
+  margin: 0;
+  font-size: 12px;
+  font-style: italic;
+  color: #7f7663;
+  line-height: 1.5;
+}
+
 .marathon-combo {
   display: flex;
   flex-direction: column;
@@ -637,14 +645,16 @@ header {
   padding: 30px 28px 20px;
 }
 
-/* La date remonte sur cette ligne par marge négative : tout le contenu
-   du header-top doit rester aligné à droite pour ne pas la chevaucher. */
+/* La date est le premier enfant flex : son margin-right auto pousse les
+   légendes à droite, et en cas de manque de place tout passe à la ligne
+   proprement (plus de chevauchement possible, à aucune largeur). */
 #header-top {
   display: flex;
   justify-content: flex-end;
   align-items: center;
   flex-wrap: wrap;
   gap: 4px 18px;
+  margin-bottom: 18px;
 }
 
 #card-legend {
@@ -676,7 +686,7 @@ header {
 #date-label {
   font-size: 12px;
   color: #b7ac8e;
-  margin: -18px 0 18px;
+  margin-right: auto;
   text-transform: capitalize;
 }
 
@@ -1587,6 +1597,10 @@ footer a {
 @media (max-width: 1000px) {
   #layout {
     grid-template-columns: 1fr;
+    /* En colonne unique avec min-height:100vh, les rangées s'étirent par
+       défaut (align-content: stretch) et créent des trous quand le contenu
+       est court (ex. onglet Marathon) : on aligne tout en haut. */
+    align-content: start;
     padding: 0; /* le rail et le contenu ont déjà leurs propres marges de 18px */
   }
 
@@ -1667,7 +1681,9 @@ footer a {
     display: none;
   }
 
-  #marathon-block.has-combo.tab-active {
+  /* .tab-active sans .has-combo : l'onglet Marathon reste consultable même
+     sans combo possible, il affiche alors le message .marathon-empty. */
+  #marathon-block.tab-active {
     display: block;
   }
 

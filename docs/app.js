@@ -1481,8 +1481,14 @@ function renderMarathonBlock() {
   if (!block || !content) return;
   const combos = computeMarathonCombos();
   block.classList.toggle("has-combo", combos.length > 0);
-  if (combos.length === 0) return;
   content.innerHTML = "";
+  if (combos.length === 0) {
+    const empty = document.createElement("p");
+    empty.className = "marathon-empty";
+    empty.textContent = "Pas de marathon possible pour le moment : il faut deux séances qui s'enchaînent (5 à 90 min d'écart, cinémas à moins de 15 min à pied). Réessayez plus tôt dans la journée !";
+    content.appendChild(empty);
+    return;
+  }
 
   function buildLeg(leg) {
     const div = document.createElement("div");
