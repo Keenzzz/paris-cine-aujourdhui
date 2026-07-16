@@ -803,6 +803,13 @@ header {
   color: #f0c168;
 }
 
+.dd-label {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 .dd-chevron {
   flex-shrink: 0;
   width: 8px;
@@ -1689,5 +1696,16 @@ footer a {
 
   .tab-mobile-only {
     display: inline-block;
+  }
+
+  /* Sur petit écran, les 3 filtres en tiers égaux sont trop étroits pour
+     leurs libellés ("Après-midi (12h–18h)"...) : chaque boîte se dimensionne
+     à son contenu et la rangée passe à la ligne si nécessaire. */
+  #showtime-filters {
+    flex-wrap: wrap;
+  }
+
+  .dd {
+    flex: 1 1 auto;
   }
 }
