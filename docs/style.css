@@ -206,6 +206,41 @@ a { color: inherit; }
   display: none;
 }
 
+/* ── Rail : lien vers le site frère Séancéo (répertoire national) ─────── */
+/* Symétrique de la passerelle Paris présente sur Séancéo. Reprend la
+   grammaire visuelle des liens « Ciné plein air » du rail. */
+.rail-seanceo-link {
+  display: block;
+  font-size: 11.5px;
+  color: #d8cfba;
+  line-height: 1.5;
+  text-decoration: none;
+}
+
+.rail-seanceo-link .t {
+  display: block;
+  font-family: Georgia, "Iowan Old Style", serif;
+  color: #f6efe1;
+  transition: color 0.15s;
+}
+
+.rail-seanceo-link:hover .t {
+  color: #7bcabb;
+  text-decoration: underline;
+}
+
+.rail-seanceo-link .d {
+  display: block;
+  color: #7f7663;
+  font-size: 10px;
+  margin-top: 3px;
+}
+
+.rail-seanceo-link:focus-visible {
+  outline: 2px solid #4f8f80;
+  outline-offset: 2px;
+}
+
 /* ── Rail carte (colonne de droite) ──────────────────────────────────── */
 
 #map-rail {
@@ -1631,7 +1666,8 @@ footer a {
 
   #rail-watchlist-block,
   #rail-feature-block,
-  #rail-villette-block {
+  #rail-villette-block,
+  #rail-seanceo-block {
     padding-top: 18px;
     border-top: 1px solid #241f18;
   }
