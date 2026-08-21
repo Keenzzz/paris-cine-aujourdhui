@@ -236,6 +236,21 @@ a { color: inherit; }
   margin-top: 3px;
 }
 
+/* Mention de la watchlist Letterboxd par pseudo, la fonction phare de Séancéo.
+   Elle est détachée de `.d` parce qu'elle ne décrit pas le CONTENU du site
+   mais ce qu'on peut y FAIRE : c'est l'argument qui justifie le clic.
+   Le filet vert reprend #00e054, déjà la couleur des notes Letterboxd sur
+   cette page (`.movie-rating`) : le visiteur associe donc la couleur à
+   Letterboxd avant même d'avoir lu la phrase. */
+.rail-seanceo-link .lb {
+  display: block;
+  color: #7f7663;
+  font-size: 10px;
+  margin-top: 5px;
+  padding-left: 7px;
+  border-left: 2px solid #00e054;
+}
+
 .rail-seanceo-link:focus-visible {
   outline: 2px solid #4f8f80;
   outline-offset: 2px;
