@@ -183,7 +183,10 @@ async function getMoviesForToday(date) {
 // que tous les appelants en bénéficient sans avoir à y penser.
 const SHOWTIMES_BUCKET_SIZE = 8;   // rafale tolérée au démarrage
 const SHOWTIMES_REFILL_MS = 750;   // ~1,3 requête/seconde en régime établi
-const SHOWTIMES_MAX_ATTEMPTS = 4;
+// 6 tentatives, soit jusqu'à ~31 s d'attente cumulée : le quota de la source
+// est partagé entre tous les visiteurs (le proxy sort par les IP Cloudflare),
+// donc une rafale peut rester bloquée plus longtemps qu'une simple fenêtre.
+const SHOWTIMES_MAX_ATTEMPTS = 6;
 
 let showtimesTokens = SHOWTIMES_BUCKET_SIZE;
 let showtimesRefillAt = Date.now();
