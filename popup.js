@@ -107,8 +107,55 @@ async function getMoviesForToday(date) {
   return movies;
 }
 
+// paris-cine.info rate-limite get_showtimes.php (Cloudflare, error code 1015)
+// au-delà d'environ 1,4 requête/seconde, et coupe alors TOUTE la rafale.
+// L'extension tape la source en direct, sans le cache du proxy : elle a d'autant
+// plus besoin de se limiter elle-même.
+const SHOWTIMES_BUCKET_SIZE = 8;   // rafale tolérée au démarrage
+const SHOWTIMES_REFILL_MS = 750;   // ~1,3 requête/seconde en régime établi
+const SHOWTIMES_MAX_ATTEMPTS = 4;
+
+let showtimesTokens = SHOWTIMES_BUCKET_SIZE;
+let showtimesRefillAt = Date.now();
+
+function sleep(ms) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+function refillShowtimesTokens() {
+  const gained = Math.floor((Date.now() - showtimesRefillAt) / SHOWTIMES_REFILL_MS);
+  if (gained > 0) {
+    showtimesTokens = Math.min(SHOWTIMES_BUCKET_SIZE, showtimesTokens + gained);
+    showtimesRefillAt += gained * SHOWTIMES_REFILL_MS;
+  }
+}
+
+// JS étant mono-thread, refill + décrément se font sans await entre les deux :
+// deux appels concurrents ne peuvent pas consommer le même jeton.
+async function takeShowtimesToken() {
+  for (;;) {
+    refillShowtimesTokens();
+    if (showtimesTokens > 0) {
+      showtimesTokens -= 1;
+      return;
+    }
+    await sleep(SHOWTIMES_REFILL_MS - ((Date.now() - showtimesRefillAt) % SHOWTIMES_REFILL_MS));
+  }
+}
+
 async function getShowtimes(movieId) {
-  const res = await fetch(`${API_BASE}/get_showtimes.php?mov_id=${movieId}`);
+  let res;
+  for (let attempt = 1; attempt <= SHOWTIMES_MAX_ATTEMPTS; attempt += 1) {
+    await takeShowtimesToken();
+    res = await fetch(`${API_BASE}/get_showtimes.php?mov_id=${movieId}`);
+    if (res.status !== 429) break;
+    // La source vient de couper : on vide le seau pour la laisser respirer,
+    // puis on patiente de plus en plus longtemps (avec un peu d'aléa).
+    showtimesTokens = 0;
+    showtimesRefillAt = Date.now();
+    if (attempt === SHOWTIMES_MAX_ATTEMPTS) break;
+    await sleep(1000 * 2 ** (attempt - 1) + Math.random() * 500);
+  }
   if (!res.ok) throw new Error(`get_showtimes.php a répondu ${res.status}`);
   const json = await res.json();
   return (json.showtimes || [])

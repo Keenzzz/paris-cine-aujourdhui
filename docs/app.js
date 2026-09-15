@@ -177,13 +177,116 @@ async function getMoviesForToday(date) {
   return movies;
 }
 
-async function getShowtimes(movieId) {
+// paris-cine.info rate-limite get_showtimes.php (Cloudflare, error code 1015)
+// au-delà d'environ 1,4 requête/seconde, et coupe alors TOUTE la rafale, pas
+// seulement le surplus. On régule donc les appels ici, en un point unique, pour
+// que tous les appelants en bénéficient sans avoir à y penser.
+const SHOWTIMES_BUCKET_SIZE = 8;   // rafale tolérée au démarrage
+const SHOWTIMES_REFILL_MS = 750;   // ~1,3 requête/seconde en régime établi
+const SHOWTIMES_MAX_ATTEMPTS = 4;
+
+let showtimesTokens = SHOWTIMES_BUCKET_SIZE;
+let showtimesRefillAt = Date.now();
+
+function sleep(ms) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+function refillShowtimesTokens() {
+  const gained = Math.floor((Date.now() - showtimesRefillAt) / SHOWTIMES_REFILL_MS);
+  if (gained > 0) {
+    showtimesTokens = Math.min(SHOWTIMES_BUCKET_SIZE, showtimesTokens + gained);
+    showtimesRefillAt += gained * SHOWTIMES_REFILL_MS;
+  }
+}
+
+function giveBackShowtimesToken() {
+  showtimesTokens = Math.min(SHOWTIMES_BUCKET_SIZE, showtimesTokens + 1);
+}
+
+// JS étant mono-thread, refill + décrément se font sans await entre les deux :
+// deux appels concurrents ne peuvent pas consommer le même jeton.
+async function takeShowtimesToken() {
+  for (;;) {
+    refillShowtimesTokens();
+    if (showtimesTokens > 0) {
+      showtimesTokens -= 1;
+      return;
+    }
+    await sleep(SHOWTIMES_REFILL_MS - ((Date.now() - showtimesRefillAt) % SHOWTIMES_REFILL_MS));
+  }
+}
+
+async function requestShowtimes(movieId) {
+  await takeShowtimesToken();
   const res = await fetch(`${API_BASE}/get_showtimes.php?mov_id=${movieId}`);
+  // Un HIT du proxy n'a rien coûté à la source : on lui rend son jeton.
+  // (Attention : l'en-tête n'est fiable que sur une réponse réseau ; quand le
+  // navigateur ressert depuis SON cache il rejoue l'en-tête figé à la mise en
+  // cache. Le cache local ci-dessous évite justement d'en arriver là.)
+  if (res.headers.get("X-Proxy-Cache") === "HIT") giveBackShowtimesToken();
+  return res;
+}
+
+// Cache local des séances : sans lui, chaque rechargement de page refait 181
+// appels et se heurte au rate-limit. Contrairement au cache HTTP du navigateur,
+// on sait ici de façon certaine si la donnée est déjà là — pas d'heuristique.
+const SHOWTIMES_CACHE_KEY = "pci_showtimes_cache";
+const SHOWTIMES_TTL_MS = 30 * 60 * 1000;
+
+let showtimesCache = null;
+let showtimesFlushTimer = null;
+
+function loadShowtimesCache() {
+  if (showtimesCache) return showtimesCache;
+  let stored = null;
+  try { stored = JSON.parse(localStorage.getItem(SHOWTIMES_CACHE_KEY)); } catch { /* cache illisible */ }
+  const fresh = stored
+    && stored.date === currentDate
+    && Date.now() - stored.savedAt < SHOWTIMES_TTL_MS;
+  showtimesCache = fresh ? stored : { date: currentDate, savedAt: Date.now(), byId: {} };
+  return showtimesCache;
+}
+
+// Une écriture par film ferait 181 sérialisations du cache entier : on groupe.
+function scheduleShowtimesFlush() {
+  if (showtimesFlushTimer) return;
+  showtimesFlushTimer = setTimeout(() => {
+    showtimesFlushTimer = null;
+    try {
+      localStorage.setItem(SHOWTIMES_CACHE_KEY, JSON.stringify(showtimesCache));
+    } catch {
+      // Quota dépassé ou stockage indisponible : le cache est un confort,
+      // pas une dépendance — on continue sans lui.
+    }
+  }, 1000);
+}
+
+async function getShowtimes(movieId) {
+  const cache = loadShowtimesCache();
+  const hit = cache.byId[movieId];
+  if (hit) return hit;
+
+  let res;
+  for (let attempt = 1; attempt <= SHOWTIMES_MAX_ATTEMPTS; attempt += 1) {
+    res = await requestShowtimes(movieId);
+    if (res.status !== 429) break;
+    // La source vient de couper : on vide le seau pour la laisser respirer,
+    // puis on patiente de plus en plus longtemps. Le petit aléa évite que tous
+    // les films en attente ne repartent exactement au même instant.
+    showtimesTokens = 0;
+    showtimesRefillAt = Date.now();
+    if (attempt === SHOWTIMES_MAX_ATTEMPTS) break;
+    await sleep(1000 * 2 ** (attempt - 1) + Math.random() * 500);
+  }
   if (!res.ok) throw new Error(`get_showtimes.php a répondu ${res.status}`);
   const json = await res.json();
-  return (json.showtimes || [])
+  const showtimes = (json.showtimes || [])
     .filter((s) => s.start)
     .sort((a, b) => a.start.localeCompare(b.start));
+  cache.byId[movieId] = showtimes;
+  scheduleShowtimesFlush();
+  return showtimes;
 }
 
 function ensureShowtimes(el, movieId) {
